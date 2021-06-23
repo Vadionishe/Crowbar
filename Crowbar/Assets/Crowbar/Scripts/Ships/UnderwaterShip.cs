@@ -1,0 +1,127 @@
+﻿using UnityEngine;
+using Mirror;
+using System.Collections.Generic;
+
+namespace Crowbar.Ship
+{
+    public class UnderwaterShip : WorldObject
+    {
+        public Transform shipPhysic;
+        public List<Collider2D> collidersShip;
+        public List<MotorRotate> motorRotates;
+        public GameObject forwardShip;
+        public GameObject forwardShipVisibleAlways;
+        public Place parentingShip;
+
+        public Water water;
+        public Transform crackParent;
+        public GameObject crackPrefab;
+        public string nameParentCracks = "Cracks";
+
+        public Vector2 LeftUpPointShip, RightDownPointShip;
+
+        [Server]
+        public void SetMotorStateServer(MotorRotate.Side side, bool isRotate)
+        {            
+            for (int i = 0; i < motorRotates.Count; i++)
+            {
+                if (motorRotates[i].side == side)
+                {
+                    if (motorRotates[i].isRotate != isRotate)
+                        RpcSetMotorState(i, isRotate);
+
+                    motorRotates[i].isRotate = isRotate;
+
+                    if (!isRotate)
+                        motorRotates[i].SetStandRotate();
+                }
+            }
+        }
+
+        [ClientRpc]
+        public void RpcSetMotorState(int indexMotor, bool isRotate)
+        {
+            motorRotates[indexMotor].isRotate = isRotate;
+
+            if (!isRotate)
+                motorRotates[indexMotor].SetStandRotate();
+        }
+
+        [Server]
+        public void AddCrack()
+        {
+            GameObject crackObject = Instantiate(crackPrefab, transform.position, Quaternion.identity, crackParent);
+            Crack crack = crackObject.GetComponent<Crack>();
+
+            crackObject.transform.localPosition = GetPositionCrack();
+            crack.waterPlace = water;
+
+            NetworkServer.Spawn(crackObject);
+            crackObject.transform.localPosition = new Vector3(crackObject.transform.localPosition.x, crackObject.transform.localPosition.y, 0);
+
+            crack.RpcSyncPosition(crackObject.transform.localPosition, GetComponent<NetworkIdentity>(), nameParentCracks);
+        }
+
+        public void VisibleInterier(WorldObject worldObject, bool isEnterShip)
+        {
+            if (worldObject.canParenting && worldObject.isLocalPlayer)
+            {
+                float newLayer = (isEnterShip) ? LayerManager.instance.shipLayerIn : LayerManager.instance.shipLayerOut;
+
+                forwardShip.SetActive(!isEnterShip);
+
+                transform.position = new Vector3(transform.position.x, transform.position.y, newLayer);
+                forwardShipVisibleAlways.transform.localPosition = new Vector3(forwardShipVisibleAlways.transform.localPosition.x,
+                    forwardShipVisibleAlways.transform.localPosition.y,
+                    (isEnterShip) ? -LayerManager.instance.shipLayerIn : forwardShip.transform.localPosition.z);
+            }
+        }
+
+        private Vector3 GetPositionCrack()
+        {
+            Vector3 posCrack = new Vector3();
+
+            posCrack.z = 0;
+            posCrack.x = Random.Range(LeftUpPointShip.x, RightDownPointShip.x);
+            posCrack.y = Random.Range(LeftUpPointShip.y, RightDownPointShip.y);
+
+            return posCrack;
+        }
+
+        private void Start()
+        {
+            if (isServer)
+            {
+                collidersShip = new List<Collider2D>();
+
+                foreach (Collider2D collider in GetComponentsInChildren<Collider2D>())
+                    if (LayerMask.LayerToName(collider.gameObject.layer) == "GroundCollision")
+                        collidersShip.Add(collider);
+
+                foreach (Collider2D collider in collidersShip)
+                    Physics2D.IgnoreCollision(collider, shipPhysic.GetComponent<Collider2D>(), true);
+            }
+            else
+            {
+                parentingShip.onParenting.AddListener(VisibleInterier);
+                Destroy(shipPhysic.gameObject);
+            }
+        }
+
+        private void FixedUpdate()
+        {
+            if (isServer)
+            {
+                transform.position = shipPhysic.position;
+                transform.eulerAngles = shipPhysic.eulerAngles;
+            }    
+        }
+
+        private void Update()
+        {
+            if (isServer)
+                if (Input.GetKeyDown(KeyCode.C))
+                    AddCrack();
+        }
+    }
+}
