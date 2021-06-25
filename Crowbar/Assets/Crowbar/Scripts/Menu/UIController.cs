@@ -1,5 +1,6 @@
 ﻿using Crowbar.Server;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Crowbar
 {
@@ -9,6 +10,23 @@ namespace Crowbar
         public GameObject registrationWindow;
         public GameObject mainMenu;
         public GameObject waitScreen;
+        public GameObject messageScreen;
+        public GameObject settingScreen;
+
+        public Text textMessage;
+        public Text textFoundPlayers;
+
+        public void SetFoundPlayersText(string playerFoundText)
+        {
+            textFoundPlayers.text = playerFoundText;
+        }
+
+        public void SetMessageScreen(string message)
+        {
+            messageScreen.SetActive(true);
+
+            textMessage.text = message;
+        }
 
         public void SetWaitScreen(bool isActive)
         {

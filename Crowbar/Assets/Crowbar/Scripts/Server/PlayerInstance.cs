@@ -13,7 +13,7 @@ namespace Crowbar.Server
 
         #region Functions
         [TargetRpc]
-        public void TargerCallbackAuthentication(NetworkConnection connection, string data)
+        public void TargerCallbackAuthentication(NetworkConnection connection, string data, string message)
         {            
             string[] parceData = data.Split(':');
 
@@ -34,14 +34,15 @@ namespace Crowbar.Server
             else
             {
                 Account.IsAuthentication = false;
-                Debug.Log("Failure Authentication!");
+
+                FindObjectOfType<UIController>().SetMessageScreen(message);
             }
 
             uIController.SetWaitScreen(false);
         }
 
         [TargetRpc]
-        public void TargerCallbackRegistration(NetworkConnection connection, string data)
+        public void TargerCallbackRegistration(NetworkConnection connection, string data, string message)
         {
             string[] parceData = data.Split(':');
 
@@ -62,7 +63,8 @@ namespace Crowbar.Server
             else
             {
                 Account.IsAuthentication = false;
-                Debug.Log("Failure Registration!");
+
+                FindObjectOfType<UIController>().SetMessageScreen(message);
             }
 
             uIController.SetWaitScreen(false);
@@ -71,7 +73,7 @@ namespace Crowbar.Server
         public void Authentication(string login, string password)
         {
             uIController.SetWaitScreen(true);
-            CmdAuthentication(login, password);
+            CmdAuthentication(login, password, Application.version);
         }
 
         public void Registration(string login, string password, string name)
@@ -81,22 +83,30 @@ namespace Crowbar.Server
         }
 
         [Command]
-        public void CmdAuthentication(string login, string password)
+        public void CmdAuthentication(string login, string password, string version)
         {
-            string _password = SQLiteDB.ExecuteRequestWithAnswer($"SELECT Password FROM Accounts WHERE Login = '{login}';");
-
-            if (password == _password)
+            if (version == Application.version)
             {
-                string name = SQLiteDB.ExecuteRequestWithAnswer($"SELECT CharacterName FROM Accounts WHERE Login = '{login}';");
-                string gold = SQLiteDB.ExecuteRequestWithAnswer($"SELECT Gold FROM Accounts WHERE Login = '{login}';");
+                string _password = SQLiteDB.ExecuteRequestWithAnswer($"SELECT Password FROM Accounts WHERE Login = '{login}';");
 
-                TargerCallbackAuthentication(netIdentity.connectionToClient, $"true:{login}:{password}:{name}:{gold}");
-                Debug.Log($"[{name}] login!");
+                if (password == _password)
+                {
+                    string name = SQLiteDB.ExecuteRequestWithAnswer($"SELECT CharacterName FROM Accounts WHERE Login = '{login}';");
+                    string gold = SQLiteDB.ExecuteRequestWithAnswer($"SELECT Gold FROM Accounts WHERE Login = '{login}';");
+
+                    TargerCallbackAuthentication(netIdentity.connectionToClient, $"true:{login}:{password}:{name}:{gold}", "Access!");
+                    Debug.Log($"[{name}] login!");
+                }
+                else
+                {
+                    TargerCallbackAuthentication(netIdentity.connectionToClient, $"false:{login}:{password}", "Failure authentication!");
+                    Debug.Log($"[{password}] incorrect!");
+                }
             }
             else
             {
-                TargerCallbackAuthentication(netIdentity.connectionToClient, $"false:{login}:{password}");
-                Debug.Log($"[{password}] incorrect!");
+                TargerCallbackAuthentication(netIdentity.connectionToClient, $"false:{login}:{password}", $"Version {version} incorrect! Actual version {Application.version}");
+                Debug.Log($"[Version {version}] incorrect!");
             }
         }
 
@@ -115,14 +125,14 @@ namespace Crowbar.Server
 
             if (existLogin)
             {
-                TargerCallbackRegistration(netIdentity.connectionToClient, $"false:{login}");
+                TargerCallbackRegistration(netIdentity.connectionToClient, $"false:{login}", "This login exist!");
                 Debug.Log($"[{login}] exist!");
             }
             else
             {
                 if (existNickname)
                 {
-                    TargerCallbackRegistration(netIdentity.connectionToClient, $"false:{login}");
+                    TargerCallbackRegistration(netIdentity.connectionToClient, $"false:{login}", "This nickname exist!");
                     Debug.Log($"[{name}] exist!");
                 }
                 else
@@ -131,7 +141,7 @@ namespace Crowbar.Server
 
                     string gold = SQLiteDB.ExecuteRequestWithAnswer($"SELECT Gold FROM Accounts WHERE Login = '{login}';");
 
-                    TargerCallbackRegistration(netIdentity.connectionToClient, $"true:{login}:{password}:{name}:{gold}");
+                    TargerCallbackRegistration(netIdentity.connectionToClient, $"true:{login}:{password}:{name}:{gold}", "Access!");
                     Debug.Log($"[{name}] registration success!");
                 }
             }
@@ -150,9 +160,18 @@ namespace Crowbar.Server
             }
         }
 
+        [TargetRpc]
+        public void TargetSetTextPlayersFound(NetworkConnection connection, string textPlayersFound)
+        {
+            FindObjectOfType<UIController>().SetFoundPlayersText(textPlayersFound);
+        }
+
         public void SetReady(bool isReady)
         {
             CmdReady(isReady);
+
+            if (!isReady)
+                FindObjectOfType<UIController>().SetFoundPlayersText(string.Empty);
         }
 
         public void ForceGameStart()

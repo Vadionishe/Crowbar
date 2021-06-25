@@ -1,5 +1,6 @@
 ﻿namespace Crowbar.Server
 {
+    using System.Collections;
     using System.Collections.Generic;
     using System.Diagnostics;    
     using System.Net.NetworkInformation;
@@ -29,6 +30,8 @@
         public List<PlayerInstance> ReadyPlayers { get; private set; }
 
         public ushort NeedPlayersToStart { get; set; } = 2;
+        public ushort NeedPlayersToStartForce { get; set; } = 6;
+        public float timeToStart { get; set; } = 20f;
 
         private const string pathGameRoom = @"C:\Users\Validay\Desktop\GameServer\Crowbar.exe";
         #endregion
@@ -84,10 +87,16 @@
             {
                 ReadyPlayers.Add(player);
 
-                if (ReadyPlayers.Count == NeedPlayersToStart)
+                if (ReadyPlayers.Count == NeedPlayersToStartForce)
                 {
                     StartGameRoom();
                 }
+                else if (ReadyPlayers.Count == NeedPlayersToStart)
+                {
+                    StartCoroutine(WaitToStart());
+                }
+
+                ReadyPlayers.ForEach(p => p.TargetSetTextPlayersFound(p.netIdentity.connectionToClient, $"Crows [{NeedPlayersToStartForce}/{ReadyPlayers.Count}]"));
             }
         }
 
@@ -99,6 +108,10 @@
         private void OnDontReadyPlayer(PlayerInstance player)
         {
             ReadyPlayers.Remove(player);
+            ReadyPlayers.ForEach(p => p.TargetSetTextPlayersFound(p.netIdentity.connectionToClient, $"Crows [{NeedPlayersToStartForce}/{ReadyPlayers.Count}]"));
+
+            if (ReadyPlayers.Count < NeedPlayersToStart)
+                StopAllCoroutines();
         }
 
         /// <summary>
@@ -139,6 +152,8 @@
             ReadyPlayers.Clear();
 
             Process.Start(pathGameRoom, $"{freePort}");
+
+            StopAllCoroutines();
         }
 
         /// <summary>
@@ -168,6 +183,13 @@
             }
 
             return -1;
+        }
+
+        private IEnumerator WaitToStart()
+        {
+            yield return new WaitForSeconds(timeToStart);
+
+            StartGameRoom();
         }
         #endregion
     }

@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using Mirror;
+using System;
 
 namespace Crowbar.Server
 {
@@ -17,6 +18,10 @@ namespace Crowbar.Server
 
         public InputField logAuth;
         public InputField passAuth;
+
+        public int minLoginLenght = 3;
+        public int minPasswordLenght = 6;
+        public int minNameLenght = 2;
 
         public Text textDebug;
 
@@ -53,12 +58,55 @@ namespace Crowbar.Server
         {
             if (localPlayerInstance != null)
             {
-                localPlayerInstance.Registration(logReg.text, passReg.text, nameReg.text);
+                bool isValid = IsValidRegistration(out string message);
 
-                logReg.text = string.Empty;
-                passReg.text = string.Empty;
-                nameReg.text = string.Empty;
+                if (isValid)
+                {
+                    localPlayerInstance.Registration(logReg.text, passReg.text, nameReg.text);
+
+                    logReg.text = string.Empty;
+                    passReg.text = string.Empty;
+                    nameReg.text = string.Empty;
+                }
+                else
+                {
+                    FindObjectOfType<UIController>().SetMessageScreen(message);
+                }
             }
+        }
+
+        private bool IsValidRegistration(out string messageValidate)
+        {
+            messageValidate = string.Empty;
+
+            if (logReg.text.Length < minLoginLenght) 
+            {
+                messageValidate = $"Login must be more than {minLoginLenght - 1} characters";
+
+                return false;
+            }
+
+            if (passReg.text.Length < minPasswordLenght)
+            {
+                messageValidate = $"Password must be more than {minPasswordLenght - 1} characters";
+
+                return false;
+            }
+
+            if (nameReg.text.Length < minNameLenght)
+            {
+                messageValidate = $"Nickname must be more than {minNameLenght - 1} characters";
+
+                return false;
+            }
+
+            return true;
+        }
+
+        private void CheckFailConnect()
+        {
+            if (!NetworkClient.isConnected)
+                FindObjectOfType<UIController>().SetMessageScreen("Connection error! Please, restart game.");
         }
 
         /// <summary>
@@ -78,6 +126,8 @@ namespace Crowbar.Server
             {
                 uIController.SetActivateWindow(uIController.authenticationWindow);
             }
+
+            Invoke(nameof(CheckFailConnect), 4f);
         }
         #endregion
     }
