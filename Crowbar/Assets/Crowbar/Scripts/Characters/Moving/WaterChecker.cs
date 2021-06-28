@@ -49,13 +49,9 @@ namespace Crowbar
                     {
                         isWater = true;
                     }
-                    else if (water.waterParent == characterPlace.transform)
+                    else if (!isWater)
                     {
-                        isWater = true;
-                    }
-                    else
-                    {
-                        isWater = false;
+                        isWater = water.waterParent == characterPlace.transform;
                     }
                 }              
             }

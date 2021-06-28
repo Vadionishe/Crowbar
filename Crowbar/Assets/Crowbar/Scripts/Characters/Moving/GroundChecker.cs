@@ -52,14 +52,16 @@
         /// <returns>Result normal for collision ground</returns>
         public float GetNormalGround()
         {
-            RaycastHit2D hit = Physics2D.Raycast(transform.position, vectorCheck, heightCheck, LayerMask.GetMask(layerName));
-
-            if (hit)
+            for (int i = 0; i < 5; i++)
             {
-                return hit.normal.x;
+                Vector3 raycatsPosition = transform.position - new Vector3(0.3f, heighStarttCheckGrounded, 0) + (new Vector3(0.15f, 0, 0) * i);
+                RaycastHit2D hit = Physics2D.Raycast(raycatsPosition, vectorCheck, heightCheckGrounded, LayerMask.GetMask(layerName));
+
+                if (hit.collider != null)
+                    return hit.normal.x;
             }
 
-            return 0f;
+            return 1f;
         }
 
         /// <summary>
@@ -70,7 +72,7 @@
         {
             for (int i = 0; i < 5; i++)
             {
-                Vector3 raycatsPosition = transform.position - new Vector3(0.45f, heighStarttCheckGrounded, 0) + (new Vector3(0.18f, 0, 0) * i);
+                Vector3 raycatsPosition = transform.position - new Vector3(0.3f, heighStarttCheckGrounded, 0) + (new Vector3(0.15f, 0, 0) * i);
                 RaycastHit2D hit = Physics2D.Raycast(raycatsPosition, vectorCheck, heightCheckGrounded, LayerMask.GetMask(layerName));
 
                 if (hit.collider != null)

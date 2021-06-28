@@ -81,7 +81,9 @@ namespace Crowbar
                 if (place != null)
                 {
                     if (place.water == water)
-                        inWater = enter;
+                        inWater = true;
+                    else
+                        inWater = false;
                 }
                 else
                 {

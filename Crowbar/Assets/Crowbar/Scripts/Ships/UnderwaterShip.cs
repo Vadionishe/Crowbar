@@ -18,6 +18,8 @@ namespace Crowbar.Ship
         public GameObject crackPrefab;
         public string nameParentCracks = "Cracks";
 
+        public int maxCountCracks = 12;
+
         public Vector2 LeftUpPointShip, RightDownPointShip;
 
         [Server]
@@ -48,18 +50,24 @@ namespace Crowbar.Ship
         }
 
         [Server]
+        [ContextMenu("AddCrack")]
         public void AddCrack()
         {
-            GameObject crackObject = Instantiate(crackPrefab, transform.position, Quaternion.identity, crackParent);
-            Crack crack = crackObject.GetComponent<Crack>();
+            if (Crack.count < maxCountCracks)
+            {
+                GameObject crackObject = Instantiate(crackPrefab, transform.position, Quaternion.identity, crackParent);
+                Crack crack = crackObject.GetComponent<Crack>();
 
-            crackObject.transform.localPosition = GetPositionCrack();
-            crack.waterPlace = water;
+                crackObject.transform.localPosition = GetPositionCrack();
+                crack.waterPlace = water;
 
-            NetworkServer.Spawn(crackObject);
-            crackObject.transform.localPosition = new Vector3(crackObject.transform.localPosition.x, crackObject.transform.localPosition.y, 0);
+                NetworkServer.Spawn(crackObject);
+                crackObject.transform.localPosition = new Vector3(crackObject.transform.localPosition.x, crackObject.transform.localPosition.y, 0);
 
-            crack.RpcSyncPosition(crackObject.transform.localPosition, GetComponent<NetworkIdentity>(), nameParentCracks);
+                crack.RpcSyncPosition(crackObject.transform.localPosition, GetComponent<NetworkIdentity>(), nameParentCracks);
+
+                Crack.count++;
+            }
         }
 
         public void VisibleInterier(WorldObject worldObject, bool isEnterShip)

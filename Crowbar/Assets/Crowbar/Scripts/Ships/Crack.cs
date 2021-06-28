@@ -7,14 +7,13 @@
 
     public class Crack : NetworkBehaviour
     {
+        public static int count;
+
         public int maxHealth = 6;
         public int curHealth = 6;
         public float waterUp;
-        public Sprite[] spriteStates;
+        public float[] scaleStates;
         public Water waterPlace;
-
-        private SpriteRenderer spriteRenderer;
-        private Dictionary<int, int> statesInfo;
 
         [ClientRpc]
         public void RpcSyncPosition(Vector3 pos, NetworkIdentity mainParent, string nameParent)
@@ -41,44 +40,14 @@
             }
             else
             {
-                SetState(statesInfo[curHealth]);
-                RpcSyncState(statesInfo[curHealth]);
+                SetState(curHealth);
+                RpcSyncState(curHealth);
             }
         }
 
         private void SetState(int state)
         {
-            if (state < spriteStates.Length || state > 0)
-                spriteRenderer.sprite = spriteStates[state];
-        }
-
-        private void Start()
-        {
-            spriteRenderer = GetComponent<SpriteRenderer>();
-
-            statesInfo = new Dictionary<int, int>
-                {
-                    { 6, 5 },
-                    { 5, 4 },
-                    { 4, 3 },
-                    { 3, 2 },
-                    { 2, 1 },
-                    { 1, 0 }
-                };
-        }
-
-        private void FixedUpdate()
-        {
-            
-        }
-
-        private void OnTriggerStay2D(Collider2D collision)
-        {
-            if (isServer)
-            {
-                CheckRepair(collision);
-                CheckWater(collision);
-            }
+            transform.localScale = Vector3.one * scaleStates[state - 1];
         }
 
         private void CheckWater(Collider2D collision)
@@ -102,6 +71,21 @@
                     RepairOne(hammer.damage);
                 }
             }
+        }
+
+        private void OnTriggerStay2D(Collider2D collision)
+        {
+            if (isServer)
+            {
+                CheckRepair(collision);
+                CheckWater(collision);
+            }
+        }
+
+        private void OnDestroy()
+        {
+            if (isServer)
+                count--;
         }
     }
 }

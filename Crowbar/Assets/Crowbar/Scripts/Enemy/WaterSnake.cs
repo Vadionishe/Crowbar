@@ -6,6 +6,8 @@ namespace Crowbar.Enemy
 {
     public class WaterSnake : Enemy
     {
+        public static int count;
+
         public int maxCrackDamage = 2;
         public int minCrackDamage = 0;
         public float damagePlayers = 1000f;
@@ -87,6 +89,12 @@ namespace Crowbar.Enemy
                 CheckCharacter(collision);
                 CheckBullet(collision);
             }
+        }
+
+        private void OnDestroy()
+        {
+            if (isServer)
+                count--;
         }
     }
 }

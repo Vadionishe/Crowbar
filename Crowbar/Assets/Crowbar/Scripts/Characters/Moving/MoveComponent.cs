@@ -197,9 +197,12 @@
         /// <returns>normal modificator</returns>
         public virtual float GetNormalModificator()
         {
+            if (!groundChecker.CheckCollision())
+                return 1f;
+
             if (groundChecker.GetNormalGround() > 0)
             {
-                if (transform.localScale.x > 0)
+                if (m_xMove > 0)
                 {
                     return 1f;
                 }
@@ -218,7 +221,7 @@
 
             if (groundChecker.GetNormalGround() < 0)
             {
-                if (transform.localScale.x > 0)
+                if (m_xMove > 0)
                 {
                     if (Mathf.Abs(groundChecker.GetNormalGround()) < maxAngleCanMove)
                     {

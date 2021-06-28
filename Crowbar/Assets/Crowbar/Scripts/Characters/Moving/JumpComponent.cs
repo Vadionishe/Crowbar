@@ -98,9 +98,7 @@
 
             if (Input.GetAxis("Vertical") < 0)
             {
-                string tagGround = string.Empty;
-
-                if (groundChecker.CheckCollision(out tagGround))
+                if (groundChecker.CheckCollision(out string tagGround))
                     if (tagGround == "OneWayPlatform")
                         StartCoroutine(JumpDown());
             }
@@ -115,11 +113,8 @@
             {
                 if (groundChecker.IsGroundRaycasting())
                 {
-                    if (Mathf.Abs(groundChecker.GetNormalGround()) < maxAngleCanJump)
-                    {
-                        SetVelocity(m_rigidBody.velocity.x, (waterChecker.CheckCollision()) ? curSwimUpForce : curJumpForce);
-                        InvokeOnStartJump();
-                    }
+                    SetVelocity(m_rigidBody.velocity.x, (waterChecker.CheckCollision()) ? curSwimUpForce : curJumpForce);
+                    InvokeOnStartJump();
                 }
                 else
                 {
@@ -149,7 +144,7 @@
             {
                 if (Input.GetKey(jumpKey))
                 {
-                    if (!groundChecker.CheckCollision() && timeJump < curMaxTimeJump)
+                    if (!groundChecker.IsGroundRaycasting() && timeJump < curMaxTimeJump)
                     {
                         if (m_rigidBody.velocity.y < curJumpForce)
                             SetVelocity(m_rigidBody.velocity.x, m_rigidBody.velocity.y + curDeltaUpJumpForce);
@@ -169,7 +164,7 @@
 
                 if (Input.GetKeyUp(jumpKey))
                 {
-                    if (!groundChecker.CheckCollision())
+                    if (!groundChecker.IsGroundRaycasting())
                     {
                         timeJump = curMaxTimeJump;
                     }
@@ -195,15 +190,13 @@
         /// </summary>
         public virtual void UpdateJump()
         {
-            string tagCollision = string.Empty;
-
             if (groundChecker.CheckCollision())
             {
                 timeJump = 0;
                 m_countJump = 0;
             }
           
-            if (headChecker.CheckCollision(out tagCollision))
+            if (headChecker.CheckCollision(out string tagCollision))
             {
                 if (tagCollision != "OneWayPlatform")
                     timeJump = curMaxTimeJump;

@@ -22,17 +22,18 @@ namespace Crowbar
         public class SpawnerWaterSnake
         {
             [Header("Spawn Water Snake properties")]
-            [Range(0, 1f)]
+            public int maxCounts = 3;
+            [Range(0, 1f)]            
             public float percentChance = 0.1f;
             public float spawnPositionY = -100f;
             public float distanceSpawn = 50f;
-            public WaterSnake prefab;
-        }
+            public WaterSnake prefab;        }
 
         [Serializable]
         public class SpawnerShark
         {
             [Header("Spawn Shark properties")]
+            public int maxCounts = 5;
             [Range(0, 1f)]
             public float percentChance = 0.2f;
             public float spawnPositionY = -300f;
@@ -51,7 +52,7 @@ namespace Crowbar
         {
             float chanceValue = Random.Range(0, 1f);
 
-            if (chanceValue < spawnerShark.percentChance)
+            if (chanceValue < spawnerShark.percentChance && Shark.count < spawnerShark.maxCounts)
             {
                 foreach (UnderwaterShip ship in FindObjectsOfType<UnderwaterShip>())
                 {
@@ -65,6 +66,8 @@ namespace Crowbar
                         Shark spawnedShark = Instantiate(spawnerShark.prefab, spawnPosition, Quaternion.identity, null);
 
                         NetworkServer.Spawn(spawnedShark.gameObject);
+
+                        Shark.count++;
                     }
                 }
             }
@@ -74,7 +77,7 @@ namespace Crowbar
         {
             float chanceValue = Random.Range(0, 1f);
 
-            if (chanceValue < spawnerWaterSnake.percentChance)
+            if (chanceValue < spawnerWaterSnake.percentChance && WaterSnake.count < spawnerWaterSnake.maxCounts)
             {
                 foreach (UnderwaterShip ship in FindObjectsOfType<UnderwaterShip>())
                 {
@@ -90,6 +93,8 @@ namespace Crowbar
                         NetworkServer.Spawn(spawnedSnake.gameObject);
 
                         spawnedSnake.Initialize(ship);
+
+                        WaterSnake.count++;
                     }
                 }
             }

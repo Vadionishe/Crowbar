@@ -9,6 +9,8 @@ namespace Crowbar.Enemy
 {
     public class Shark : Enemy
     {
+        public static int count;
+
         public int maxCrackDamage = 2;
         public int minCrackDamage = 0;
         public float damagePlayers = 1000f;
@@ -98,6 +100,12 @@ namespace Crowbar.Enemy
                 CheckBullet(collision);
                 CheckShip(collision);
             }
+        }
+
+        private void OnDestroy()
+        {
+            if (isServer)
+                count--;
         }
     }
 }
