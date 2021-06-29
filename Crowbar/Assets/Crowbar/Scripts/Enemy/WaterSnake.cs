@@ -63,6 +63,8 @@ namespace Crowbar.Enemy
                 if (!isDied)
                 {
                     ChangeHealth(-bullet.damage);
+
+                    NetworkServer.Destroy(bullet.gameObject);
                 }
             }
         }
@@ -72,12 +74,18 @@ namespace Crowbar.Enemy
             NetworkServer.Destroy(gameObject);
         }
 
+        private void Awake()
+        {
+            networkAnimator.Initialize();
+        }
+
         private void Start()
         {
             if (isServer)
-            {
+            {                 
                 Initialize(FindObjectOfType<UnderwaterShip>());
                 Invoke(nameof(DestroySnake), timeToDestroy);
+                InvokeRepeating(nameof(CheckToDestroy), timerCheckDestroy, timerCheckDestroy);
             }
         }
 

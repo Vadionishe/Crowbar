@@ -66,6 +66,9 @@ namespace Crowbar.Ship
 
                 crack.RpcSyncPosition(crackObject.transform.localPosition, GetComponent<NetworkIdentity>(), nameParentCracks);
 
+                foreach (Character character in parentingShip.GetComponentsInChildren<Character>())
+                    character.TargetCameraShake(character.netIdentity.connectionToClient, 0.5f, 0.4f);
+
                 Crack.count++;
             }
         }

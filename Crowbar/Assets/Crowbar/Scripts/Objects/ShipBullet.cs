@@ -8,6 +8,8 @@
         public float damage = 1f;
         public float gravity = 0.06f;
 
+        public string layerName = "GroundCollision";
+
         private Vector2 velocity;
 
         [Server]
@@ -19,7 +21,7 @@
         private void Start()
         {
             if (!isServer)
-                enabled = true;
+                enabled = false;
         }
 
         private void Update()
@@ -32,9 +34,10 @@
         {
             if (isServer)
             {
-                //Отнимание хп у IHealth (ещё не реализован)
-
-                //NetworkServer.Destroy(gameObject);
+                if (LayerMask.LayerToName(collision.gameObject.layer) == layerName)
+                {
+                    NetworkServer.Destroy(gameObject);
+                }
             }
         }
     }

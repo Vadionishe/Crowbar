@@ -1,4 +1,7 @@
-﻿using UnityEngine;
+﻿using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
+using System.Collections;
 
 namespace Crowbar
 {
@@ -13,6 +16,14 @@ namespace Crowbar
         public GameObject settingScreen;
         public GameObject requestQuit;
         public GameObject requestDisconnect;
+
+        public GameObject notificationScreen;
+        public Image notificationImage;
+        public TextMeshProUGUI notificationText;
+
+        public Image healthHUD;
+        public Image oxygenHUD;
+        public Image foodHUD;
 
         public static void Initialize(Character localCharacter)
         {
@@ -54,6 +65,16 @@ namespace Crowbar
             SetWindowActive(requestQuit);
         }
 
+        public void ShowNotification(Sprite image, string text, float time)
+        {
+            StopAllCoroutines();
+
+            notificationImage.sprite = image;
+            notificationText.text = text;
+
+            StartCoroutine(ShowNotification(time));
+        }
+
         private bool IsLockInput()
         {
             return menuScreen.activeSelf ||
@@ -61,6 +82,25 @@ namespace Crowbar
                 requestDisconnect.activeSelf ||
                 requestQuit.activeSelf ||
                 Chat.lockInput;
+        }
+
+        private void UpdateHUD()
+        {
+            if (localStats != null)
+            {
+                healthHUD.fillAmount = localStats.health / localStats.maxHealth;
+                oxygenHUD.fillAmount = localStats.oxygen / localStats.maxOxygen;
+                foodHUD.fillAmount = localStats.food / localStats.maxFood;
+            }
+        }
+
+        private IEnumerator ShowNotification(float time)
+        {
+            notificationScreen.SetActive(true);
+
+            yield return new WaitForSeconds(time);
+
+            notificationScreen.SetActive(false);
         }
 
         private void Awake()
@@ -85,6 +125,8 @@ namespace Crowbar
                     SetWindowActive(menuScreen);
                 }
             }
+
+            UpdateHUD();
         }
     }
 }

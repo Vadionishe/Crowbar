@@ -26,6 +26,7 @@ namespace Crowbar.Enemy
             if (ship != null && canDamage && !isDied)
             {
                 StartCoroutine(WaitCooldownDamage());
+                StartCoroutine(AnimationAttack());
 
                 int countCracks = Random.Range(minCrackDamage, maxCrackDamage + 1);
 
@@ -58,8 +59,19 @@ namespace Crowbar.Enemy
                 if (!isDied)
                 {
                     ChangeHealth(-bullet.damage);
+
+                    NetworkServer.Destroy(bullet.gameObject);
                 }
             }
+        }
+
+        private IEnumerator AnimationAttack()
+        {
+            animator.SetBool("isAttack", true);
+
+            yield return new WaitForSeconds(0.4f);
+
+            animator.SetBool("isAttack", false);
         }
 
         private IEnumerator WaitCooldownDamage()
@@ -69,6 +81,11 @@ namespace Crowbar.Enemy
             yield return new WaitForSeconds(cooldownDamage);
 
             canDamage = true;
+        }
+
+        private void Awake()
+        {
+            networkAnimator.Initialize();
         }
 
         private void Start()
@@ -89,6 +106,8 @@ namespace Crowbar.Enemy
 
                     Physics2D.IgnoreCollision(colliderShip, sharkCollider, true);
                 }
+
+                InvokeRepeating(nameof(CheckToDestroy), timerCheckDestroy, timerCheckDestroy);
             }
         }
 

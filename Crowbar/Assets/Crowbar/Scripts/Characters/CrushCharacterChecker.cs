@@ -2,7 +2,7 @@
 
 namespace Crowbar
 {
-    public class CrushCharacterChecker : MonoBehaviour, ICollisionChecker
+    public class CrushCharacterChecker : MonoBehaviour
     {
         [Header("Settings checker")]
         [Tooltip("Name layer for checker")]
@@ -11,16 +11,6 @@ namespace Crowbar
         public string tagName = "Untagged";
 
         private CharacterStats stats;
-        private bool isGround;
-
-        /// <summary>
-        /// Check collision ground
-        /// </summary>
-        /// <returns>Result collision</returns>
-        public bool CheckCollision()
-        {
-            return isGround;
-        }
 
         private void Start()
         {
@@ -29,20 +19,9 @@ namespace Crowbar
 
         private void OnTriggerEnter2D(Collider2D collision)
         {
-            if (LayerMask.LayerToName(collision.gameObject.layer) == layerName && collision.tag == tagName)
-            {
-                isGround = true;
-
-                stats.ChangeDied(true);
-            }
-        }
-
-        private void OnTriggerExit2D(Collider2D collision)
-        {
-            if (LayerMask.LayerToName(collision.gameObject.layer) == layerName && collision.tag == tagName)
-            {
-                isGround = false;
-            }
+            if (stats.netIdentity.isLocalPlayer)
+                if (LayerMask.LayerToName(collision.gameObject.layer) == layerName && collision.tag == tagName)
+                    stats.CmdDied(true);
         }
     }
 }

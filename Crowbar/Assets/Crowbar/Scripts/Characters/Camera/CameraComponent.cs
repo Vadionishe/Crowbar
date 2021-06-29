@@ -1,5 +1,6 @@
 ﻿namespace Crowbar
 {
+    using System.Collections;
     using UnityEngine;
 
     /// <summary>
@@ -24,10 +25,15 @@
         public Transform target;
 
         private float m_targetLookSize;
-        private float m_velocityLookSize;
         #endregion
 
         #region Functions
+        public void Shake(float duration, float magnitude)
+        {
+            StopAllCoroutines();
+            StartCoroutine(Shaking(duration, magnitude));
+        }
+
         /// <summary>
         /// Set camera default look size
         /// </summary>
@@ -89,6 +95,26 @@
                 cam.orthographicSize = Mathf.Lerp(cam.orthographicSize, m_targetLookSize, smoothMove);
                 cam.transform.position = pos;
             }
+        }
+
+        private IEnumerator Shaking(float duration, float magnitude)
+        {
+            Vector3 originalPos = cam.transform.localPosition;
+            float elapsedTime = 0f;
+
+            while (elapsedTime < duration)
+            {
+                float xOffset = Random.Range(-0.5f, 0.5f) * magnitude;
+                float yOffset = Random.Range(-0.5f, 0.5f) * magnitude;
+
+                cam.transform.localPosition += new Vector3(xOffset, yOffset, 0f);
+
+                elapsedTime += Time.deltaTime;
+
+                yield return null;
+            }
+
+            cam.transform.localPosition = originalPos;
         }
 
         private void Awake()

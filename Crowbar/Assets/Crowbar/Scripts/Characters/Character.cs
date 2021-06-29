@@ -42,6 +42,8 @@
         public HandController handController;
         [Tooltip("Avatar controller")]
         public AvatarController avatarController;
+        [Tooltip("Camera component")]
+        public CameraComponent cameraComponent;
 
         [Tooltip("Player audio listener"), SerializeField]
         private AudioListener audioListener;
@@ -70,6 +72,12 @@
                 hand.itemObject.Drop(netIdentity);
 
             base.OnStopServer(); 
+        }
+
+        [TargetRpc]
+        public void TargetCameraShake(NetworkConnection connection, float duration, float magnitude)
+        {
+            cameraComponent.Shake(duration, magnitude);
         }
 
         [Command]

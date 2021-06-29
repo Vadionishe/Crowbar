@@ -53,6 +53,10 @@ namespace Crowbar
                     {
                         isWater = water.waterParent == characterPlace.transform;
                     }
+                    else if (isWater)
+                    {
+                        isWater = false;
+                    }
                 }              
             }
         }
@@ -66,20 +70,6 @@ namespace Crowbar
                 if (character.transform.parent == null)
                 {
                     if (water.waterParent == null)
-                    {
-                        isWater = false;
-                    }
-                }
-                else
-                {
-                    Place characterPlace = character.transform.parent.GetComponent<Place>();
-
-                    if (water.waterParent == null && characterPlace.openAir)
-                    {
-                        isWater = false;
-                    }
-
-                    if (water.waterParent == characterPlace.transform)
                     {
                         isWater = false;
                     }

@@ -35,6 +35,12 @@ namespace Crowbar
         public class DiedEvent : UnityEvent<bool> { }
         public DiedEvent onDied;
 
+        [Command]
+        public void CmdDied(bool isDied)
+        {
+            ChangeDied(isDied);
+        }
+
         public void SetComponentActive(bool isActive)
         {
             enabled = isActive;

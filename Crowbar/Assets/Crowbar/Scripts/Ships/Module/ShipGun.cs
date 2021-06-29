@@ -23,6 +23,7 @@
         private Vector3 m_velocityRotate;
 
         [Server]
+        [ContextMenu("Shot")]
         public void Shot()
         {
             if (canShot && magazinGun.bullet > 0 && electricStorage.electric >= electricDown)

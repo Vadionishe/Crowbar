@@ -80,10 +80,17 @@ namespace Crowbar
             {
                 if (place != null)
                 {
-                    if (place.water == water)
+                    if (place.openAir)
+                    {
                         inWater = true;
+                    }
                     else
-                        inWater = false;
+                    {
+                        if (place.water == water)
+                            inWater = true;
+                        else
+                            inWater = false;
+                    }
                 }
                 else
                 {
