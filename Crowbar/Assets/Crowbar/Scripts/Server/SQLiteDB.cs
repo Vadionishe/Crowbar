@@ -1,4 +1,5 @@
 ﻿using Mono.Data.Sqlite;
+using System.Collections.Generic;
 
 namespace Crowbar.Server
 {
@@ -33,6 +34,36 @@ namespace Crowbar.Server
                         return answer.ToString();
                     else
                         return null;
+                }
+            }
+        }
+
+        public static List<string> GetRecords(string query)
+        {
+            List<string> records = new List<string>();
+
+            using (SqliteConnection sqliteConnection = new SqliteConnection("Data Source=" + DBPath))
+            {
+                using (SqliteCommand sqliteCommand = new SqliteCommand(sqliteConnection))
+                {
+                    sqliteConnection.Open();
+                    sqliteCommand.CommandText = query;
+
+                    using (SqliteDataReader reader = sqliteCommand.ExecuteReader())
+                    {
+                        if (reader.HasRows)
+                        {
+                            while (reader.Read())
+                            {
+                                string name = reader.GetValue(0).ToString();
+                                string deep = reader.GetValue(1).ToString();
+
+                                records.Add($"{name} - {deep} m");
+                            }
+                        }
+                    }
+
+                    return records;
                 }
             }
         }

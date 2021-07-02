@@ -15,9 +15,12 @@ namespace Crowbar
         public GameObject rightHand;
         public GameObject glass;
         public GameObject mouth;
+        public GameObject hat;
         public TextMesh textName;
         public bool isLocal;      
-        public bool canFlip;      
+        public bool canFlip;
+
+        public int idHat;
 
         private float movementSmoothing;
         private Vector3 m_velocity;
@@ -27,6 +30,13 @@ namespace Crowbar
         public void SetName(string name)
         {
             textName.text = name;
+        }
+
+        public void SetSkin(int idHat)
+        {
+            this.idHat = idHat;
+
+            SkinsManager.SetHat(hat.GetComponent<SpriteRenderer>(), idHat);
         }
 
         private void SetFlipping(bool isRight)

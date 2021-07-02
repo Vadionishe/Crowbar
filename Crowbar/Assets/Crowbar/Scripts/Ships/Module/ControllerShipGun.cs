@@ -2,6 +2,7 @@
 {
     using UnityEngine;
     using Mirror;
+    using Crowbar.Item;
 
     public class ControllerShipGun : NetworkBehaviour, IShipModule, IPickInfo
     {
@@ -15,6 +16,11 @@
         public ElectricStorage electricStorage;
         [Tooltip("Electric cost move gun")]
         public float electricDown = 0.01f;
+
+        [SyncVar]
+        public int maxBullet;
+        [SyncVar(hook = nameof(SyncValue))]
+        public int bullet;
 
         public Color PickColor = Color.green;
 
@@ -34,6 +40,18 @@
         public void UnPick()
         {
             GetComponent<SpriteRenderer>().color = m_colorMain;
+        }
+
+        [Client]
+        private void SyncValue(int oldValue, int newValue)
+        {
+            
+        }
+
+        [Server]
+        public void ChangeBullet(int value)
+        {
+            bullet = Mathf.Clamp(bullet + value, 0, maxBullet);
         }
 
         /// <summary>
@@ -75,26 +93,38 @@
         [Server]
         public void Use(NetworkIdentity usingCharacter)
         {
-            if (usingCharacter.GetComponent<Character>().hand.itemObject != null)
-                return;
+            Character character = usingCharacter.GetComponent<Character>();
+            ItemObject itemObject = character.hand.itemObject;
 
-            if (m_usingCharacter != null)
+            if (itemObject != null)
             {
-                if (m_usingCharacter == usingCharacter)
+                if (itemObject as Bullet && bullet < maxBullet)
                 {
-                    DropControl();
+                    ChangeBullet(1);
+                    itemObject.Drop(usingCharacter);
+                    NetworkServer.Destroy(itemObject.gameObject);
                 }
             }
             else
             {
-                m_usingCharacter = usingCharacter;
-                m_playerInput = usingCharacter.GetComponent<PlayerInputForServer>();
-                m_playerInput.onClickLeft.AddListener(shipGun.Shot);
-                m_playerInput.onPushQ.AddListener(DropControl);
-                usingCharacter.GetComponent<CharacterStats>().onDied.AddListener(DropControl);
+                if (m_usingCharacter != null)
+                {
+                    if (m_usingCharacter == usingCharacter)
+                    {
+                        DropControl();
+                    }
+                }
+                else
+                {
+                    m_usingCharacter = usingCharacter;
+                    m_playerInput = usingCharacter.GetComponent<PlayerInputForServer>();
+                    m_playerInput.onClickLeft.AddListener(shipGun.Shot);
+                    m_playerInput.onPushQ.AddListener(DropControl);
+                    usingCharacter.GetComponent<CharacterStats>().onDied.AddListener(DropControl);
 
-                TargetUsing(usingCharacter.connectionToClient, usingCharacter, false);
-            }
+                    TargetUsing(usingCharacter.connectionToClient, usingCharacter, false);
+                }
+            }           
         }
 
         /// <summary>

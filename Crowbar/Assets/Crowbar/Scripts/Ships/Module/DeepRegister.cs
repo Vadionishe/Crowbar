@@ -51,6 +51,15 @@ namespace Crowbar
                 SQLiteDB.ExecuteRequestWithoutAnswer($"UPDATE Accounts SET MaxDeep = {deep} WHERE CharacterName = '{character.nameCharacter}';");
                 TargetNotificationUpdateRecord(character.netIdentity.connectionToClient, deep);
             }
+
+            if (deep > 1000)
+                AchivmentsHandler.AddProgress(character, 1);
+
+            if (deep > 3000)
+                AchivmentsHandler.AddProgress(character, 2);
+
+            if (deep > 10000)
+                AchivmentsHandler.AddProgress(character, 3);
         }
     }
 }

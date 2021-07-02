@@ -89,12 +89,31 @@
             RpcSetName(name);
         }
 
+        [Command]
+        public void CmdSetSkin(int idHat)
+        {
+            avatarController.SetSkin(idHat);
+            RpcSetSkin(idHat);
+        }
+
+        [Command(ignoreAuthority = true)]
+        public void CmdGetSkin()
+        {
+            RpcSetSkin(avatarController.idHat);
+        }
+
         [ClientRpc]
         public void RpcSetName(string name)
         {
             nameCharacter = name;
 
             avatarController.SetName(name);
+        }
+
+        [ClientRpc]
+        public void RpcSetSkin(int idHat)
+        {
+            avatarController.SetSkin(idHat);
         }
 
         private void DisableComponents()
@@ -208,11 +227,15 @@
             if (isServer || !isLocalPlayer)
                 DisableComponents();
 
+            if (!isLocalPlayer)
+                CmdGetSkin();
+
             if (isLocalPlayer)
             {
                 GameUI.Initialize(this);
 
                 CmdSetName(Account.Name);
+                CmdSetSkin(Account.idCurrentHat);
                 InvokeRepeating(nameof(SyncCharacter), 1f / hand.sendRate, 1f / hand.sendRate);
             }
         }

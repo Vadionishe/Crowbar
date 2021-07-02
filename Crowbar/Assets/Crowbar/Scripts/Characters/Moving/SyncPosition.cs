@@ -28,9 +28,9 @@
         [Tooltip("Smooth speed for rotation"), SerializeField]
         private float smoothRotate = 0.1f;
         [Tooltip("Simulate ping"), SerializeField]
-        private float simulatePing = 0.8f;
+        private float simulatePing = 0f;
         [Tooltip("Simulate ping"), SerializeField]
-        private float percentLostPacket = 0.1f;
+        private float percentLostPacket = 0f;
 
         private Vector3 m_targetPositionGlobal, m_targetPositionLocal, m_targetRotation;
         private Vector3 m_velocityMove, m_velocityRotate;

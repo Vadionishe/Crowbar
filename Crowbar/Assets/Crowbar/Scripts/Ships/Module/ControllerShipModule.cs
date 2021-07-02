@@ -131,8 +131,6 @@
             m_playerInput.onPushQ.RemoveListener(DropControl);
             m_usingCharacter = null;
             m_playerInput = null;
-
-            physicShip.Move(new Vector2(0, 0));
         }
 
         private void FixedUpdate()

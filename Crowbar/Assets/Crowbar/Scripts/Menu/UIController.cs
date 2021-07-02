@@ -12,6 +12,8 @@ namespace Crowbar
         public GameObject waitScreen;
         public GameObject messageScreen;
         public GameObject settingScreen;
+        public GameObject recordsScreen;
+        public GameObject achivmentScreen;
 
         public Text textMessage;
         public Text textFoundPlayers;
@@ -45,7 +47,7 @@ namespace Crowbar
 
         public void Logout()
         {
-            Account.IsAuthentication = false;
+            Account.Reset();
 
             SetActivateWindow(authenticationWindow);
             SetDeactivateWindow(mainMenu);

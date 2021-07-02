@@ -58,23 +58,8 @@
             Water water = collision.GetComponent<Water>();
 
             if (water != null)
-            {
                 if (water.waterParent == null && waterPlace != null)
-                {
-                    if (isServer)
-                        waterPlace.ChangeHeight(waterUp);
-
-                    isCollideWaterGlobal = true;
-                }
-                else
-                {
-                    isCollideWaterGlobal = false;
-                }
-            }
-            else
-            {
-                isCollideWaterGlobal = false;
-            }
+                    waterPlace.ChangeHeight(waterUp);
         }
 
         private void CheckSplash()
@@ -113,6 +98,16 @@
             }
         }
 
+        private void Start()
+        {
+            if (!isServer)
+            {                
+                waterPlace = GetComponentInParent<UnderwaterShip>().water;
+
+                particle.Play();
+            }
+        }
+
         private void Update()
         {
             if (!isServer)
@@ -121,22 +116,37 @@
 
         private void OnTriggerEnter2D(Collider2D collision)
         {
-            if (collision.GetComponent<Water>() == waterPlace)
-                isCollideWaterShip = true;
+            if (!isServer)
+            {
+                if (collision.gameObject == waterPlace.gameObject)
+                    isCollideWaterShip = true;
+
+                if (collision.GetComponent<Water>() != null)
+                    if (collision.GetComponent<Water>().waterParent == null)
+                        isCollideWaterGlobal = true;
+            }
         }
 
         private void OnTriggerExit2D(Collider2D collision)
         {
-            if (collision.GetComponent<Water>() == waterPlace)
-                isCollideWaterShip = false;
+            if (!isServer)
+            {
+                if (collision.gameObject == waterPlace.gameObject)
+                    isCollideWaterShip = false;
+
+                if (collision.GetComponent<Water>() != null)
+                    if (collision.GetComponent<Water>().waterParent == null)
+                        isCollideWaterGlobal = false;
+            }
         }
 
         private void OnTriggerStay2D(Collider2D collision)
         {
             if (isServer)
+            {
+                CheckWater(collision);
                 CheckRepair(collision);
-
-            CheckWater(collision);
+            }
         }
 
         private void OnDestroy()

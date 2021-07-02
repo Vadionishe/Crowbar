@@ -1,9 +1,10 @@
 ﻿using UnityEngine;
 using UnityEngine.SceneManagement;
 using Mirror;
+using System.Collections.Generic;
 
 namespace Crowbar.Server
-{    
+{
     /// <summary>
     /// Main logic for connecting to main server
     /// </summary>
@@ -12,6 +13,103 @@ namespace Crowbar.Server
         private UIController uIController;
 
         #region Functions
+        public void GetRecords(int countRecords)
+        {
+            CmdGetRecords(countRecords);
+
+            uIController.SetWaitScreen(true);
+        }
+
+        public void BuyHat(int id, string name, int price)
+        {
+            CmdBuyHat(id, name, price);
+
+            uIController.SetWaitScreen(true);
+        }
+
+        public void SetHat(int id, string name)
+        {
+            CmdSetHat(id, name);
+        }
+
+        public void CmdSetHat(int id, string name)
+        {
+            SQLiteDB.ExecuteRequestWithoutAnswer($"UPDATE Accounts SET Skin = '{id}' WHERE CharacterName = '{name}';");
+        }
+
+        [Command]
+        public void CmdBuyHat(int id, string name, int price)
+        {
+            string hats = SQLiteDB.ExecuteRequestWithAnswer($"SELECT SkinsId FROM Accounts WHERE CharacterName = '{name}';");
+            string gold = SQLiteDB.ExecuteRequestWithAnswer($"SELECT Gold FROM Accounts WHERE CharacterName = '{name}';");
+
+            string[] hatsIdString = hats.Split(',');
+            List<int> hatsId = new List<int>();
+
+            foreach (string hatId in hatsIdString)
+                if (int.TryParse(hatId, out int _idTry))
+                    hatsId.Add(_idTry);
+
+            if (!hatsId.Contains(id))
+            {
+                if (int.Parse(gold) >= price)
+                {
+                    hats += $"{id},";
+
+                    SQLiteDB.ExecuteRequestWithoutAnswer($"UPDATE Accounts SET SkinsId = '{hats}' WHERE CharacterName = '{name}';");
+                    SQLiteDB.ExecuteRequestWithoutAnswer($"UPDATE Accounts SET Gold = Gold - {price} WHERE CharacterName = '{name}';");
+
+                    TargetBuyHat(netIdentity.connectionToClient, true, id, "");
+                }
+                else
+                {
+                    TargetBuyHat(netIdentity.connectionToClient, false, id, "Not enough gold!");
+                }               
+            }
+            else
+            {
+                TargetBuyHat(netIdentity.connectionToClient, false, id, "Not enough gold!");
+            }           
+        }
+
+        [TargetRpc]
+        public void TargetBuyHat(NetworkConnection connection, bool isAccess, int id, string message)
+        {
+            uIController.SetWaitScreen(false);
+
+            if (!string.IsNullOrEmpty(message))
+                uIController.SetMessageScreen(message);
+
+            if (isAccess)
+            {
+                SkinHat skinHat = FindObjectOfType<SkinShop>().hats.Find(h => h.id == id);
+
+                if (skinHat != null) 
+                {
+                    Account.Gold -= skinHat.price;
+
+                    skinHat.SetBuy();
+                    FindObjectOfType<ClientMenu>().SetInfoAccount();
+                }
+            }              
+        }
+
+        [Command]
+        public void CmdGetRecords(int countRecords)
+        {
+            List<string> records = SQLiteDB.GetRecords($"SELECT CharacterName, MaxDeep FROM Accounts ORDER BY MaxDeep DESC LIMIT {countRecords};");
+
+            TargetSendRecords(netIdentity.connectionToClient, records);
+        }
+
+        [TargetRpc]
+        public void TargetSendRecords(NetworkConnection connection, List<string> records)
+        {
+            FindObjectOfType<RecordManager>().SetRecords(records);
+
+            uIController.SetWaitScreen(false);
+        }
+
         [TargetRpc]
         public void TargerCallbackAuthentication(NetworkConnection connection, string data, string message)
         {            
@@ -19,23 +117,20 @@ namespace Crowbar.Server
 
             if (parceData[0] == "true")
             {
-                Account.IsAuthentication = true;
-                Account.IsGuest = false;
-                Account.Login = parceData[1];
-                Account.Password = parceData[2];
-                Account.Name = parceData[3];
-                Account.Gold = int.Parse(parceData[4]);
+                Account.MapAccount(data);
 
                 uIController.SetActivateWindow(uIController.mainMenu);
                 uIController.SetDeactivateWindow(uIController.authenticationWindow);
 
                 FindObjectOfType<ClientMenu>().SetInfoAccount();
+                FindObjectOfType<ManagerAchivments>().SetActiveAchivments(Account.idAchivments);
+                FindObjectOfType<SkinShop>().LoadHats(Account.idHats, Account.idCurrentHat);
             }
             else
             {
-                Account.IsAuthentication = false;
+                Account.Reset();
 
-                FindObjectOfType<UIController>().SetMessageScreen(message);
+                uIController.SetMessageScreen(message);
             }
 
             uIController.SetWaitScreen(false);
@@ -47,13 +142,8 @@ namespace Crowbar.Server
             string[] parceData = data.Split(':');
 
             if (parceData[0] == "true")
-            {                
-                Account.IsAuthentication = true;
-                Account.IsGuest = false;
-                Account.Login = parceData[1];
-                Account.Password = parceData[2];
-                Account.Name = parceData[3];
-                Account.Gold = int.Parse(parceData[4]);
+            {
+                Account.MapAccount(data);
 
                 uIController.SetActivateWindow(uIController.mainMenu);
                 uIController.SetDeactivateWindow(uIController.registrationWindow);
@@ -62,9 +152,9 @@ namespace Crowbar.Server
             }
             else
             {
-                Account.IsAuthentication = false;
+                Account.Reset();
 
-                FindObjectOfType<UIController>().SetMessageScreen(message);
+                uIController.SetMessageScreen(message);
             }
 
             uIController.SetWaitScreen(false);
@@ -93,8 +183,11 @@ namespace Crowbar.Server
                 {
                     string name = SQLiteDB.ExecuteRequestWithAnswer($"SELECT CharacterName FROM Accounts WHERE Login = '{login}';");
                     string gold = SQLiteDB.ExecuteRequestWithAnswer($"SELECT Gold FROM Accounts WHERE Login = '{login}';");
+                    string currentHat = SQLiteDB.ExecuteRequestWithAnswer($"SELECT Skin FROM Accounts WHERE Login = '{login}';");
+                    string achivments = SQLiteDB.ExecuteRequestWithAnswer($"SELECT AchivmentsId FROM Accounts WHERE Login = '{login}';");
+                    string hats = SQLiteDB.ExecuteRequestWithAnswer($"SELECT SkinsId FROM Accounts WHERE Login = '{login}';");
 
-                    TargerCallbackAuthentication(netIdentity.connectionToClient, $"true:{login}:{password}:{name}:{gold}", "Access!");
+                    TargerCallbackAuthentication(netIdentity.connectionToClient, $"true:{login}:{password}:{name}:{gold}:{achivments}:{currentHat}:{hats}", "Access!");
                     Debug.Log($"[{name}] login!");
                 }
                 else
@@ -141,7 +234,7 @@ namespace Crowbar.Server
 
                     string gold = SQLiteDB.ExecuteRequestWithAnswer($"SELECT Gold FROM Accounts WHERE Login = '{login}';");
 
-                    TargerCallbackRegistration(netIdentity.connectionToClient, $"true:{login}:{password}:{name}:{gold}", "Access!");
+                    TargerCallbackRegistration(netIdentity.connectionToClient, $"true:{login}:{password}:{name}:0:0:0:0", "Access!");
                     Debug.Log($"[{name}] registration success!");
                 }
             }
@@ -163,7 +256,7 @@ namespace Crowbar.Server
         [TargetRpc]
         public void TargetSetTextPlayersFound(NetworkConnection connection, string textPlayersFound)
         {
-            FindObjectOfType<UIController>().SetFoundPlayersText(textPlayersFound);
+            uIController.SetFoundPlayersText(textPlayersFound);
         }
 
         public void SetReady(bool isReady)
@@ -171,7 +264,7 @@ namespace Crowbar.Server
             CmdReady(isReady);
 
             if (!isReady)
-                FindObjectOfType<UIController>().SetFoundPlayersText(string.Empty);
+                uIController.SetFoundPlayersText(string.Empty);
         }
 
         public void ForceGameStart()

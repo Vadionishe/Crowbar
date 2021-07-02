@@ -127,12 +127,5 @@ namespace Crowbar.Ship
                 transform.eulerAngles = shipPhysic.eulerAngles;
             }    
         }
-
-        private void Update()
-        {
-            if (isServer)
-                if (Input.GetKeyDown(KeyCode.C))
-                    AddCrack();
-        }
     }
 }
