@@ -27,11 +27,13 @@ namespace Crowbar.Server
             uIController.SetWaitScreen(true);
         }
 
+        [Client]
         public void SetHat(int id, string name)
         {
             CmdSetHat(id, name);
         }
 
+        [Command]
         public void CmdSetHat(int id, string name)
         {
             SQLiteDB.ExecuteRequestWithoutAnswer($"UPDATE Accounts SET Skin = '{id}' WHERE CharacterName = '{name}';");
@@ -314,7 +316,8 @@ namespace Crowbar.Server
         {
             if (isServer)
             {
-                MainServer.DisconnectHandler.Invoke(this);
+                if (gameObject != null)
+                    MainServer.DisconnectHandler.Invoke(this);
             }
         }
         #endregion

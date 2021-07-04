@@ -10,7 +10,14 @@ namespace Crowbar
         public ShipDoor door;
         public Water water;
 
+        public AudioSource audioSource;
+
         public bool isCollideWaterShip;
+
+        private void Start()
+        {
+            audioSource.volume = Settings.volume;
+        }
 
         private void Update()
         {
@@ -19,18 +26,27 @@ namespace Crowbar
                 if (isCollideWaterShip)
                 {
                     if (!particle.isStopped)
+                    {
                         particle.Stop();
+                        audioSource.Stop();
+                    }
                 }
                 else
                 {
                     if (particle.isStopped)
+                    {
                         particle.Play();
+                        audioSource.Play();
+                    }
                 }
             }
             else
             {
                 if (!particle.isStopped)
+                {
                     particle.Stop();
+                    audioSource.Stop();
+                }
             }    
         }
 

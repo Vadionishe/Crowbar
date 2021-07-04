@@ -1,9 +1,9 @@
-﻿namespace Crowbar.Ship
-{
-    using Crowbar.Item;
-    using UnityEngine;
-    using Mirror;
+﻿using Crowbar.Item;
+using UnityEngine;
+using Mirror;
 
+namespace Crowbar.Ship
+{
     public class Crack : NetworkBehaviour
     {
         public static int count;
@@ -18,6 +18,10 @@
         public bool isCollideWaterShip;
         public bool isCollideWaterGlobal;
 
+        public AudioClip crashSound;
+        public AudioClip repaireSound;
+        public AudioSource audioSource;
+
         [ClientRpc]
         public void RpcSyncPosition(Vector3 pos, NetworkIdentity mainParent, string nameParent)
         {
@@ -30,6 +34,8 @@
         public void RpcSyncState(int state)
         {
             SetState(state);
+
+            audioSource.PlayOneShot(repaireSound);
         }
 
         [Server]
@@ -69,18 +75,27 @@
                 if (isCollideWaterShip)
                 {
                     if (!particle.isStopped)
+                    {
                         particle.Stop();
+                        audioSource.Stop();
+                    }
                 }
                 else
                 {
                     if (particle.isStopped)
+                    {
                         particle.Play();
+                        audioSource.Play();
+                    }
                 }
             }
             else
             {
                 if (!particle.isStopped)
+                {
                     particle.Stop();
+                    audioSource.Stop();
+                }
             }
         }
 
@@ -103,7 +118,9 @@
             if (!isServer)
             {                
                 waterPlace = GetComponentInParent<UnderwaterShip>().water;
+                audioSource.volume = Settings.volume;
 
+                audioSource.PlayOneShot(crashSound);
                 particle.Play();
             }
         }

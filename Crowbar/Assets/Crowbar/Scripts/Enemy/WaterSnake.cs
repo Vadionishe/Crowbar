@@ -46,7 +46,7 @@ namespace Crowbar.Enemy
 
             if (stats != null)
             {
-                if (stats.oxygenChecker.place == null && !stats.isDied && !isDied)
+                if (stats.transform.parent == null && !stats.isDied && !isDied)
                 {
                     stats.ChangeHealth(-damagePlayers);
                 }
@@ -86,6 +86,10 @@ namespace Crowbar.Enemy
                 Initialize(FindObjectOfType<UnderwaterShip>());
                 Invoke(nameof(DestroySnake), timeToDestroy);
                 InvokeRepeating(nameof(CheckToDestroy), timerCheckDestroy, timerCheckDestroy);
+            }
+            else
+            {
+                GetComponent<Collider2D>().isTrigger = true;
             }
         }
 

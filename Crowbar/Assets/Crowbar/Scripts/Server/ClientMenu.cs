@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using Mirror;
-using System;
 
 namespace Crowbar.Server
 {
@@ -24,6 +23,8 @@ namespace Crowbar.Server
         public int minNameLenght = 2;
 
         public Text textDebug;
+
+        public Texture2D cursor;
 
         #region Functions
         public void SetInfoAccount()
@@ -107,6 +108,11 @@ namespace Crowbar.Server
         {
             if (!NetworkClient.isConnected)
                 FindObjectOfType<UIController>().SetMessageScreen("Connection error! Please, restart game.");
+        }
+
+        private void Awake()
+        {
+            Cursor.SetCursor(cursor, Vector2.zero, CursorMode.Auto);
         }
 
         /// <summary>

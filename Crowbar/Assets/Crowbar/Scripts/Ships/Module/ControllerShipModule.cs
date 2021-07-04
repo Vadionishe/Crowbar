@@ -12,7 +12,7 @@
         [Header("Module properties")]
         [Tooltip("Ship physics model")]
         public PhysicShip physicShip;
-
+        
         public Color PickColor = Color.green;
 
         private Color m_colorMain;
@@ -60,7 +60,9 @@
         [Server]
         public void Use(NetworkIdentity usingCharacter)
         {
-            if (usingCharacter.GetComponent<Character>().hand.itemObject != null)
+            Character character = usingCharacter.GetComponent<Character>();
+
+            if (character.hand.itemObject != null)
                 return;
 
             if (m_usingCharacter != null)
@@ -70,8 +72,9 @@
                     DropControl();
                 }
             }
-            else
+            else if (!character.isBusy)
             {
+                character.isBusy = true;
                 m_usingCharacter = usingCharacter;
                 m_playerInput = usingCharacter.GetComponent<PlayerInputForServer>();
                 m_playerInput.onPushQ.AddListener(DropControl);
@@ -127,6 +130,7 @@
         [Server]
         private void ClearBusyModule()
         {
+            m_usingCharacter.GetComponent<Character>().isBusy = false;
             m_usingCharacter.GetComponent<CharacterStats>().onDied.RemoveListener(DropControl);
             m_playerInput.onPushQ.RemoveListener(DropControl);
             m_usingCharacter = null;

@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 
 namespace Crowbar 
 {
@@ -10,6 +12,10 @@ namespace Crowbar
         [Header("Collision properties")]
         [Tooltip("Water tag")]
         public string tagWater = "Water";
+
+        private Water currentWater;
+        private List<Water> waters;
+        private List<Water> collisionWaters;
 
         private Character character;
         private bool isWater;
@@ -25,40 +31,52 @@ namespace Crowbar
 
         private void Start()
         {
+            collisionWaters = new List<Water>();
+
             character = GetComponentInParent<Character>();
+            waters = FindObjectsOfType<Water>().ToList();
         }
 
-        private void OnTriggerStay2D(Collider2D collision)
+        private void Update()
+        {
+            if (character.transform.parent == null)
+            {
+                currentWater = waters.Find(w => w.waterParent == null);
+            }
+            else
+            {
+                Place place = character.transform.parent.GetComponent<Place>();
+
+                if (place.openAir)
+                {
+                    currentWater = waters.Find(w => w.waterParent == null);
+                }
+                else
+                {
+                    currentWater = place.water;
+                }
+            }
+
+            foreach (Water water in collisionWaters)
+            {
+                if (water == currentWater)
+                {
+                    isWater = true;
+
+                    return;
+                }
+            }
+
+            isWater = false;
+        }
+
+        private void OnTriggerEnter2D(Collider2D collision)
         {
             Water water = collision.GetComponent<Water>();
 
             if (water != null)
-            {
-                if (character.transform.parent == null)
-                {
-                    if (water.waterParent == null)
-                    {
-                        isWater = true;
-                    }
-                }
-                else
-                {
-                    Place characterPlace = character.transform.parent.GetComponent<Place>();
-
-                    if (water.waterParent == null && characterPlace.openAir)
-                    {
-                        isWater = true;
-                    }
-                    else if (!isWater)
-                    {
-                        isWater = water.waterParent == characterPlace.transform;
-                    }
-                    else if (isWater)
-                    {
-                        isWater = false;
-                    }
-                }              
-            }
+                if (!collisionWaters.Contains(water))
+                    collisionWaters.Add(water);
         }
 
         private void OnTriggerExit2D(Collider2D collision)
@@ -66,15 +84,8 @@ namespace Crowbar
             Water water = collision.GetComponent<Water>();
 
             if (water != null)
-            {
-                if (character.transform.parent == null)
-                {
-                    if (water.waterParent == null)
-                    {
-                        isWater = false;
-                    }
-                }
-            }
+                if (collisionWaters.Contains(water))
+                    collisionWaters.Remove(water);
         }
     }
 }

@@ -1,11 +1,10 @@
-﻿namespace Crowbar
-{
-    using UnityEngine;
-    using UnityEngine.Events;
-    using Mirror;
-    using Crowbar.Net;
-    using Crowbar.Ship;
+﻿using UnityEngine;
+using UnityEngine.Events;
+using Mirror;
+using Crowbar.Ship;
 
+namespace Crowbar
+{
     public class Place : NetworkBehaviour
     {
         public class EventParenting : UnityEvent<WorldObject, bool> { }
@@ -14,6 +13,8 @@
         public Water water;
         public OxygenStorage oxygen;
         public Transform target;
+
+        public AudioClip placeSound;
 
         public bool openAir;
         public float positionZ;
@@ -33,7 +34,10 @@
         private void Update()
         {
             if (target != null)
-                transform.position = new Vector3(target.transform.position.x, target.transform.position.y, transform.position.z);
+            {
+                transform.position = target.position;
+                transform.rotation = target.rotation;
+            }
         }
 
         private void OnTriggerStay2D(Collider2D collision)

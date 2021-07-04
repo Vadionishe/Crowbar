@@ -45,6 +45,8 @@
         [Tooltip("Camera component")]
         public CameraComponent cameraComponent;
 
+        public bool isBusy;
+
         [Tooltip("Player audio listener"), SerializeField]
         private AudioListener audioListener;
 
@@ -94,12 +96,6 @@
         {
             avatarController.SetSkin(idHat);
             RpcSetSkin(idHat);
-        }
-
-        [Command(ignoreAuthority = true)]
-        public void CmdGetSkin()
-        {
-            RpcSetSkin(avatarController.idHat);
         }
 
         [ClientRpc]
@@ -227,8 +223,8 @@
             if (isServer || !isLocalPlayer)
                 DisableComponents();
 
-            if (!isLocalPlayer)
-                CmdGetSkin();
+            if (isServer)
+                SyncHelper.instance.SyncCharacter();
 
             if (isLocalPlayer)
             {

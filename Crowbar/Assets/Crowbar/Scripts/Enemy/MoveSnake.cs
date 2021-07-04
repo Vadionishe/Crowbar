@@ -5,6 +5,14 @@ namespace Crowbar.Enemy
     public class MoveSnake : MoveEnemy
     {
         public WaterSnake waterSnake;
+        public AudioSource audioSource;
+
+        private void Start()
+        {
+            audioSource.volume = Settings.volume;
+
+            audioSource.Play();
+        }
 
         private void Update()
         {

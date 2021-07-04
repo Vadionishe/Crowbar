@@ -50,6 +50,11 @@ namespace Crowbar.Enemy
 
             if (players.Length == 0 && isDied)
                 NetworkServer.Destroy(gameObject);
+
+            Collider2D[] _players = Physics2D.OverlapCircleAll(transform.position, distanceCheckDestroy * 5, LayerMask.GetMask("Player"));
+
+            if (_players.Length == 0)
+                NetworkServer.Destroy(gameObject);
         }
     }
 }

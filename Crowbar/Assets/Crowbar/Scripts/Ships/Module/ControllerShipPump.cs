@@ -11,32 +11,41 @@ namespace Crowbar.Ship
         public Water waterShip;
         [Tooltip("Electric storage")]
         public ElectricStorage electricStorage;
+        public AudioSource audioSource;
 
         public float maxPumpHeight = 100f;
         public float minPumpHeight = 0;
+        [SyncVar]
         public float pumpHeight = 0;
         public float speedPumpMove = 0.1f;
         public float valuePumpedWater = 2f;
         public float electricDown = 0.1f;
         public bool canWaterPumped;
 
+        public float maxScalePump;
+        public float minScalePump;
+        public GameObject pump;
+        public GameObject pumpUp;
+        public GameObject targetUp;
+
         public Color PickColor = Color.green;
 
-        private Color m_colorMain;
-
+        private bool isSoundedPump;
+        private Color m_colorMain = Color.white;
         private NetworkIdentity m_usingCharacter;
         private PlayerInputForServer m_playerInput;
         #endregion
 
         public void Pick()
         {
-            m_colorMain = GetComponent<SpriteRenderer>().color;
-            GetComponent<SpriteRenderer>().color = PickColor;
+            foreach (SpriteRenderer renderer in GetComponentsInChildren<SpriteRenderer>())
+                renderer.color = PickColor;
         }
 
         public void UnPick()
         {
-            GetComponent<SpriteRenderer>().color = m_colorMain;
+            foreach (SpriteRenderer renderer in GetComponentsInChildren<SpriteRenderer>())
+                renderer.color = m_colorMain;
         }
 
         /// <summary>
@@ -65,7 +74,9 @@ namespace Crowbar.Ship
         /// <param name="usingCharacter">Character using</param>
         public void Use(NetworkIdentity usingCharacter)
         {
-            if (usingCharacter.GetComponent<Character>().hand.itemObject != null)
+            Character character = usingCharacter.GetComponent<Character>();
+
+            if (character.hand.itemObject != null)
                 return;
 
             if (m_usingCharacter != null)
@@ -75,8 +86,10 @@ namespace Crowbar.Ship
                     DropControl();
                 }
             }
-            else
+            else if (!character.isBusy)
             {
+                character.isBusy = true;
+
                 m_usingCharacter = usingCharacter;
                 m_playerInput = usingCharacter.GetComponent<PlayerInputForServer>();
                 m_playerInput.onPushQ.AddListener(DropControl);
@@ -142,14 +155,46 @@ namespace Crowbar.Ship
         [Server]
         private void ClearBusyModule()
         {
+            m_usingCharacter.GetComponent<Character>().isBusy = false;
             m_usingCharacter.GetComponent<CharacterStats>().onDied.RemoveListener(DropControl);
             m_playerInput.onPushQ.RemoveListener(DropControl);
             m_usingCharacter = null;
             m_playerInput = null;
         }
 
-        private void FixedUpdate()
+        private void PumpAnimation()
         {
+            float scaleY = minScalePump + (maxScalePump - minScalePump) * (pumpHeight / maxPumpHeight);
+
+            pumpUp.transform.position = new Vector3(targetUp.transform.position.x, targetUp.transform.position.y, targetUp.transform.position.z - 0.0001f);
+            pump.transform.localScale = new Vector3(pump.transform.localScale.x, scaleY, pump.transform.localScale.z);
+
+            if (!isSoundedPump && pumpHeight == maxPumpHeight)
+            {
+                audioSource.Play();
+                isSoundedPump = true;
+            }
+
+            if (isSoundedPump && pumpHeight == minPumpHeight)
+            {
+                audioSource.Play();
+                isSoundedPump = false;
+            }
+        }
+
+        private void Start()
+        {
+            audioSource.volume = Settings.volume;
+        }
+
+        private void Update()
+        {
+            if (!isServer)
+                PumpAnimation();
+        }
+
+        private void FixedUpdate()
+        {           
             if (isServer)
             {
                 if (m_playerInput != null)

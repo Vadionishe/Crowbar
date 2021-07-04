@@ -16,9 +16,16 @@ namespace Crowbar.Enemy
         public float timeToDestroy = 20f;
 
         public UnderwaterShip target;
+        public AudioSource audioSource;
         public Shark shark;
 
         public bool isMove;
+
+        [ClientRpc]
+        public void RpcSetSound()
+        {
+            audioSource.Play();
+        }
 
         public void Leave()
         {
@@ -44,6 +51,8 @@ namespace Crowbar.Enemy
                 StopAllCoroutines();
                 StartCoroutine(MoveTimer(timeMove));
                 StartCoroutine(WaitTimer(timeMove + timeWait));
+
+                RpcSetSound();
             }
         }
 
@@ -92,6 +101,12 @@ namespace Crowbar.Enemy
                 target = FindObjectOfType<UnderwaterShip>();
 
                 StartMove();
+            }
+            else
+            {
+                audioSource.volume = Settings.volume;
+
+                audioSource.Play();
             }
         }
 

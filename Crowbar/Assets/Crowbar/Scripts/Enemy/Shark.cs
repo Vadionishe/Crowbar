@@ -42,7 +42,7 @@ namespace Crowbar.Enemy
 
             if (stats != null)
             {
-                if (stats.oxygenChecker.place == null && !stats.isDied && !isDied)
+                if (stats.transform.parent == null && !stats.isDied && !isDied)
                 {
                     stats.ChangeHealth(-damagePlayers);
                 }
@@ -90,24 +90,28 @@ namespace Crowbar.Enemy
 
         private void Start()
         {
+            List<PhysicShip> underwaterShips = FindObjectsOfType<PhysicShip>().ToList();
+
+            foreach (PhysicShip ship in underwaterShips)
+            {
+                Collider2D colliderShip = ship.GetComponent<Collider2D>();
+                Collider2D sharkCollider = GetComponent<Collider2D>();
+                List<Collider2D> collidersShip = new List<Collider2D>();
+
+                foreach (Collider2D collider in ship.underwaterShip.GetComponentsInChildren<Collider2D>())
+                    if (LayerMask.LayerToName(collider.gameObject.layer) == "GroundCollision")
+                        Physics2D.IgnoreCollision(collider, sharkCollider, true);
+
+                Physics2D.IgnoreCollision(colliderShip, sharkCollider, true);
+            }
+
             if (isServer)
             {
-                List<PhysicShip> underwaterShips = FindObjectsOfType<PhysicShip>().ToList();
-
-                foreach (PhysicShip ship in underwaterShips)
-                {
-                    Collider2D colliderShip = ship.GetComponent<Collider2D>();
-                    Collider2D sharkCollider = GetComponent<Collider2D>();
-                    List<Collider2D> collidersShip = new List<Collider2D>();
-
-                    foreach (Collider2D collider in ship.underwaterShip.GetComponentsInChildren<Collider2D>())
-                        if (LayerMask.LayerToName(collider.gameObject.layer) == "GroundCollision")
-                            Physics2D.IgnoreCollision(collider, sharkCollider, true);
-
-                    Physics2D.IgnoreCollision(colliderShip, sharkCollider, true);
-                }
-
                 InvokeRepeating(nameof(CheckToDestroy), timerCheckDestroy, timerCheckDestroy);
+            }
+            else
+            {
+                GetComponent<Collider2D>().isTrigger = true;
             }
         }
 

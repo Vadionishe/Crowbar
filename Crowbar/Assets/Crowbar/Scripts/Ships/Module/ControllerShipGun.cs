@@ -16,16 +16,19 @@
         public ElectricStorage electricStorage;
         [Tooltip("Electric cost move gun")]
         public float electricDown = 0.01f;
+        [Tooltip("Camera look size")]
+        public float lookSize = 7f;
 
         [SyncVar]
         public int maxBullet;
         [SyncVar(hook = nameof(SyncValue))]
         public int bullet;
+        public SpriteRenderer[] bulletSprites;
+        public AudioSource audioSource;
 
         public Color PickColor = Color.green;
 
         private Color m_colorMain;
-
         private NetworkIdentity m_usingCharacter;
         private PlayerInputForServer m_playerInput;
         #endregion
@@ -45,7 +48,16 @@
         [Client]
         private void SyncValue(int oldValue, int newValue)
         {
-            
+            if (oldValue < newValue)
+            {
+                bulletSprites[newValue - 1].enabled = true;
+
+                audioSource.Play();
+            }
+            else
+            {
+                bulletSprites[newValue].enabled = false;
+            }
         }
 
         [Server]
@@ -111,11 +123,12 @@
                 {
                     if (m_usingCharacter == usingCharacter)
                     {
-                        DropControl();
+                        DropControl();                       
                     }
                 }
-                else
+                else if (!character.isBusy)
                 {
+                    character.isBusy = true;
                     m_usingCharacter = usingCharacter;
                     m_playerInput = usingCharacter.GetComponent<PlayerInputForServer>();
                     m_playerInput.onClickLeft.AddListener(shipGun.Shot);
@@ -136,6 +149,7 @@
         [TargetRpc]
         public void TargetUsing(NetworkConnection connection, NetworkIdentity usingCharacter, bool isActiveUse)
         {
+            CameraComponent cameraComponent = usingCharacter.GetComponent<CameraComponent>();
             MoveComponent moveComponent = usingCharacter.GetComponent<MoveComponent>();
             JumpComponent jumpComponent = usingCharacter.GetComponent<JumpComponent>();
             Character character = usingCharacter.GetComponent<Character>();
@@ -169,17 +183,29 @@
                 currentPosition.x = transform.position.x;
                 currentPosition.y = transform.position.y;
                 usingCharacter.transform.position = currentPosition;
+
+                cameraComponent.SetLookSize(lookSize, 1f);
+            }
+            else
+            {
+                cameraComponent.SetDefaultLookSize();
             }
         }
 
         [Server]
         private void ClearBusyModule()
         {
+            m_usingCharacter.GetComponent<Character>().isBusy = false;
             m_usingCharacter.GetComponent<CharacterStats>().onDied.RemoveListener(DropControl);
             m_playerInput.onPushQ.RemoveListener(DropControl);
             m_playerInput.onClickLeft.RemoveListener(shipGun.Shot);
             m_usingCharacter = null;
             m_playerInput = null;
+        }
+
+        private void Start()
+        {
+            audioSource.volume = Settings.volume;
         }
 
         private void FixedUpdate()

@@ -11,6 +11,8 @@
     {
         #region Variables
         public static GameServer instance;
+        string[] args;
+        public GameObject loadScreen;
         #endregion
 
         #region Functions
@@ -21,21 +23,39 @@
         {
             instance = this;
 
-            string[] args = Environment.GetCommandLineArgs();
+            args = Environment.GetCommandLineArgs();
 
             try
             {
                 if (args.Length > 1)
                 {
                     (Transport.activeTransport as TelepathyTransport).port = Convert.ToUInt16(args[1]);
-                }
 
-                NetworkManager.singleton.StartServer();
+                    NetworkManager.singleton.StartServer();
+                }
             }
             catch (Exception e)
             {
                 Debug.LogError(e);
             }
+
+            InvokeRepeating(nameof(CheckToQuit), 20f, 20f);
+        }
+
+        private void CheckToQuit()
+        {
+            Character[] characters = FindObjectsOfType<Character>();
+
+            if (characters.Length > 0)
+            {
+                foreach (Character character in characters)
+                {
+                    if (!character.GetComponent<CharacterStats>().isDied)
+                        return;
+                }
+            }
+
+            Application.Quit();
         }
 
         /// <summary>
@@ -50,6 +70,8 @@
 
                 NetworkManager.singleton.StartServer();
             }
+
+            loadScreen.SetActive(!NetworkServer.active);
         }
         #endregion
     }

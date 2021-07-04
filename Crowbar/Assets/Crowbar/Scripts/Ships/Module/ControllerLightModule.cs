@@ -6,6 +6,8 @@ namespace Crowbar.Ship
     public class ControllerLightModule : NetworkBehaviour, IShipModule, IPickInfo
     {
         public LightSprite2D light2D;
+        public AudioSource audioSourceLight;
+        public AudioSource audioSource;
         public ElectricStorage electricStorage;
 
         public float electricDown = 0.01f;
@@ -40,6 +42,24 @@ namespace Crowbar.Ship
         private void RpcSetLight(bool enableLight)
         {
             light2D.enabled = enableLight;
+
+            audioSource.Play();
+
+            if (audioSourceLight != null)
+            {
+                if (enableLight)
+                    audioSourceLight.Play();
+                else
+                    audioSourceLight.Stop();
+            }
+        }
+
+        private void Start()
+        {
+            audioSource.volume = Settings.volume;
+
+            if (audioSourceLight != null)
+                audioSourceLight.volume = Settings.volume;
         }
 
         private void Update()

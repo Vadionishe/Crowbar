@@ -26,13 +26,17 @@ namespace Crowbar.Item
 
         public void Pick()
         {
-            m_colorMain = rendererItem.color;
-            rendererItem.color = PickColor;
+            if (rendererItem != null)
+            {
+                m_colorMain = rendererItem.color;
+                rendererItem.color = PickColor;
+            }
         }
 
         public void UnPick()
         {
-            rendererItem.color = m_colorMain;
+            if (rendererItem != null)
+                rendererItem.color = m_colorMain;
         }
 
         [ClientRpc]
@@ -93,7 +97,7 @@ namespace Crowbar.Item
         {
             Character character = usingCharacter.GetComponent<Character>();
 
-            if (character.hand.itemObject == null) 
+            if (character.hand.itemObject == null && !character.isBusy) 
             {
                 canParenting = false;
                 transform.parent = character.hand.handParentPoint;
@@ -125,13 +129,12 @@ namespace Crowbar.Item
             StartCoroutine(Cooldown());
         }
 
-        private void Start()
+        private void CheckToDestroy()
         {
-            if (!isServer)
-            {
-                GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Kinematic;
-                colliderItem.isTrigger = true;
-            }
+            Collider2D[] players = Physics2D.OverlapCircleAll(transform.position, 400f, LayerMask.GetMask("Player"));
+
+            if (players.Length == 0)
+                NetworkServer.Destroy(gameObject);
         }
 
         private IEnumerator Cooldown()
@@ -141,6 +144,19 @@ namespace Crowbar.Item
             yield return new WaitForSeconds(cooldownAttack);
 
             onCooldown = false;
+        }
+
+        private void Start()
+        {
+            if (isServer)
+            {
+                InvokeRepeating(nameof(CheckToDestroy), 30f, 30f);
+            }
+            else
+            {
+                GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Kinematic;
+                colliderItem.isTrigger = true;
+            }
         }
     }
 }

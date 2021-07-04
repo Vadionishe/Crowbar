@@ -6,12 +6,16 @@ namespace Crowbar.Ship
 {
     public class UnderwaterShip : WorldObject
     {
+        [SyncVar]
+        public bool isMove;
+
         public Transform shipPhysic;
         public List<Collider2D> collidersShip;
         public List<MotorRotate> motorRotates;
         public GameObject forwardShip;
         public GameObject forwardShipVisibleAlways;
         public Place parentingShip;
+        public AudioSource audioSource;
 
         public Water water;
         public Transform crackParent;
@@ -101,6 +105,8 @@ namespace Crowbar.Ship
 
         private void Start()
         {
+            audioSource.volume = Settings.volume;
+
             if (isServer)
             {
                 collidersShip = new List<Collider2D>();
@@ -125,7 +131,20 @@ namespace Crowbar.Ship
             {
                 transform.position = shipPhysic.position;
                 transform.eulerAngles = shipPhysic.eulerAngles;
-            }    
+            }
+            else
+            {
+                if (isMove)
+                {
+                    if (!audioSource.isPlaying)
+                        audioSource.Play();
+                }
+                else
+                {
+                    if (audioSource.isPlaying)
+                        audioSource.Stop();
+                }
+            }
         }
     }
 }

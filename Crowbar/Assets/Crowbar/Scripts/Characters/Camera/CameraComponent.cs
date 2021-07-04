@@ -37,8 +37,9 @@
         /// <summary>
         /// Set camera default look size
         /// </summary>
-        public void SetDefaultLookSize()
+        public void SetDefaultLookSize(float smooth = 0.1f)
         {
+            smoothMove = smooth;
             SetLookSize(lookSize);
         }
 
@@ -46,8 +47,9 @@
         /// Set camera look size
         /// </summary>
         /// <param name="size">Look size</param>
-        public void SetLookSize(float size)
+        public void SetLookSize(float size, float smooth = 0.1f)
         {
+            smoothMove = smooth;
             m_targetLookSize = size;
         }
 

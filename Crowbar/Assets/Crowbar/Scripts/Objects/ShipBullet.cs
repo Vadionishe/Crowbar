@@ -10,6 +10,8 @@
 
         public string layerName = "GroundCollision";
 
+        public AudioSource audioSource;
+
         private Vector2 velocity;
 
         [Server]
@@ -20,6 +22,8 @@
 
         private void Start()
         {
+            audioSource.volume = Settings.volume;
+
             if (!isServer)
                 enabled = false;
         }

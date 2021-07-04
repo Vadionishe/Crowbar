@@ -54,7 +54,9 @@ namespace Crowbar.Ship
 
             m_rigidBody.gravityScale = (waterChecker.CheckCollision()) ? gravityWater : gravity;
 
-            if (electricStorage.electric >= electricDown && fuelStorage.fuel >= fuelDown && canMove)
+            underwaterShip.isMove = directionMove != Vector2.zero;
+
+            if (electricStorage.electric >= electricDown && fuelStorage.fuel >= fuelDown && canMove && underwaterShip.isMove)
             {
                 underwaterShip.SetMotorStateServer(MotorRotate.Side.Left, directionMove.x > 0);
                 underwaterShip.SetMotorStateServer(MotorRotate.Side.Right, directionMove.x < 0);

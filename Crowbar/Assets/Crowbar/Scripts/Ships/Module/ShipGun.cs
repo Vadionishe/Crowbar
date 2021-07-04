@@ -14,7 +14,7 @@
 
         public Transform spawnBulletPosition;
         public ShipBullet bulletPrefab;
-        public MagazinGunModule magazinGun;
+        public ControllerShipGun controllerGun;
         public ElectricStorage electricStorage;
 
         private bool canShot = true;
@@ -26,12 +26,12 @@
         [ContextMenu("Shot")]
         public void Shot()
         {
-            if (canShot && magazinGun.bullet > 0 && electricStorage.electric >= electricDown)
+            if (canShot && controllerGun.bullet > 0 && electricStorage.electric >= electricDown)
             {
                 electricStorage.ChangeElectric(-electricDown);
 
                 StartCoroutine(Cooldown());
-                magazinGun.ChangeBullet(-1);
+                controllerGun.ChangeBullet(-1);
 
                 ShipBullet bullet = Instantiate(bulletPrefab, spawnBulletPosition.transform.position, Quaternion.identity, null);
 

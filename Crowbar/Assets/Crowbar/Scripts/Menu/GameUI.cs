@@ -25,6 +25,8 @@ namespace Crowbar
         public Image oxygenHUD;
         public Image foodHUD;
 
+        public Texture2D cursor;
+
         public static void Initialize(Character localCharacter)
         {
             localStats = localCharacter.GetComponent<CharacterStats>();
@@ -33,6 +35,14 @@ namespace Crowbar
         public static void SetLoadScreen(bool isActive)
         {
             gameUI.loadScreen.SetActive(isActive);
+        }
+
+        public void SetVolume(float volume)
+        {
+            Settings.SetVolume(volume);
+
+            foreach (AudioSource audio in FindObjectsOfType<AudioSource>())
+                audio.volume = Settings.volume;
         }
 
         public void CloseAllWindow()
@@ -106,6 +116,8 @@ namespace Crowbar
         private void Awake()
         {
             gameUI = this;
+
+            Cursor.SetCursor(cursor, Vector2.zero, CursorMode.Auto);
         }
 
         private void Update()

@@ -42,16 +42,6 @@
         }
 
         /// <summary>
-        /// For test
-        /// Shows the status of connection to the room server
-        /// </summary>
-        private void OnGUI()
-        {
-            Rect r = new Rect(5, 5, 800, 500);
-            GUI.Label(r, (NetworkClient.isConnected) ? "Connect game" : "Disconnect game");
-        }
-
-        /// <summary>
         /// Connect to the room server
         /// We get the port from the main server before connecting to the room
         /// </summary>

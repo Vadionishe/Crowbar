@@ -18,12 +18,16 @@
         public float stopDistance = 0.05f;
         public bool isOpen = true;
 
+        public AudioSource audioSource;
+
         private Vector3 velocity;
 
         [ClientRpc]
         public void RpcSetState(bool state)
         {
             isOpen = state;
+
+            audioSource.Play();
         }
 
         [Server]
@@ -32,6 +36,11 @@
             isOpen = state;
 
             RpcSetState(isOpen);
+        }
+
+        private void Start()
+        {
+            audioSource.volume = Settings.volume;
         }
 
         private void Update()

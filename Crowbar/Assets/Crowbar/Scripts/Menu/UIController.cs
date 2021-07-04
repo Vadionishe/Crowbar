@@ -52,5 +52,10 @@ namespace Crowbar
             SetActivateWindow(authenticationWindow);
             SetDeactivateWindow(mainMenu);
         }
+
+        public void Quit()
+        {
+            Application.Quit();
+        }
     }
 }
