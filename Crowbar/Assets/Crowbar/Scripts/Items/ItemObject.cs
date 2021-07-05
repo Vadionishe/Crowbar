@@ -21,7 +21,6 @@ namespace Crowbar.Item
 
         public Color PickColor = Color.green;
 
-        private Rigidbody2D m_rigidbody;
         private Color m_colorMain;
 
         public void Pick()
@@ -129,7 +128,7 @@ namespace Crowbar.Item
             StartCoroutine(Cooldown());
         }
 
-        private void CheckToDestroy()
+        protected void CheckToDestroy()
         {
             Collider2D[] players = Physics2D.OverlapCircleAll(transform.position, 400f, LayerMask.GetMask("Player"));
 
@@ -144,19 +143,6 @@ namespace Crowbar.Item
             yield return new WaitForSeconds(cooldownAttack);
 
             onCooldown = false;
-        }
-
-        private void Start()
-        {
-            if (isServer)
-            {
-                InvokeRepeating(nameof(CheckToDestroy), 30f, 30f);
-            }
-            else
-            {
-                GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Kinematic;
-                colliderItem.isTrigger = true;
-            }
         }
     }
 }

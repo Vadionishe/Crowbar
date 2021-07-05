@@ -68,6 +68,14 @@
             GameUI.SetLoadScreen(false);
         }
 
+        public override void OnStopClient()
+        {
+            base.OnStopClient();
+
+            GameUI.SetLoadScreen(true);
+            FindObjectOfType<ClientGame>().Disconnect();
+        }
+
         public override void OnStopServer()
         {
             if (hand.itemObject != null)

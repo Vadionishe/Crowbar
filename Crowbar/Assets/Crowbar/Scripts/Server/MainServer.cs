@@ -30,7 +30,7 @@
         public List<PlayerInstance> ReadyPlayers { get; private set; }
 
         public ushort NeedPlayersToStart { get; set; } = 2;
-        public ushort NeedPlayersToStartForce { get; set; } = 6;
+        public ushort NeedPlayersToStartForce { get; set; } = 100;
         public float timeToStart { get; set; } = 20f;
 
         private const string pathGameRoom = @"C:\Users\Validay\Desktop\GameServer\Crowbar.exe";

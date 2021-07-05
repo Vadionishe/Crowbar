@@ -18,6 +18,8 @@ namespace Crowbar.Server
         public InputField logAuth;
         public InputField passAuth;
 
+        public InputField portForce;
+
         public int minLoginLenght = 3;
         public int minPasswordLenght = 6;
         public int minNameLenght = 2;
@@ -41,7 +43,7 @@ namespace Crowbar.Server
         public void ForceStartGame()
         {
             if (localPlayerInstance != null)
-                localPlayerInstance.ForceGameStart();
+                localPlayerInstance.ForceGameStart(portForce.text);
         }
 
         public void Authentication()
@@ -50,8 +52,15 @@ namespace Crowbar.Server
             {
                 localPlayerInstance.Authentication(logAuth.text, passAuth.text);
 
-                logAuth.text = string.Empty;
-                passAuth.text = string.Empty;
+                if (Settings.remember)
+                {
+                    Settings.SaveAuth(logAuth.text, passAuth.text);
+                }
+                else
+                {
+                    logAuth.text = string.Empty;
+                    passAuth.text = string.Empty;
+                }
             }
         }
 

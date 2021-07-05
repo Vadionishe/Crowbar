@@ -269,9 +269,9 @@ namespace Crowbar.Server
                 uIController.SetFoundPlayersText(string.Empty);
         }
 
-        public void ForceGameStart()
+        public void ForceGameStart(string port)
         {
-            ClientGame.port = 8001;
+            ClientGame.port = ushort.Parse(port);
             NetworkManager.singleton.StopClient();
             SceneManager.LoadScene("Game");
         }

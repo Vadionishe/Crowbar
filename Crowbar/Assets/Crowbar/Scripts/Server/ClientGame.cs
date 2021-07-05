@@ -33,15 +33,6 @@
         }
 
         /// <summary>
-        /// At the start of the scene, we launch a delayed connection to the room server
-        /// </summary>
-        private void Start()
-        {
-            StartCoroutine(WaitForConnection());
-            InvokeRepeating(nameof(CheckConnection), timeCheckForConnect, timeCheckForConnect);
-        }
-
-        /// <summary>
         /// Connect to the room server
         /// We get the port from the main server before connecting to the room
         /// </summary>
@@ -71,7 +62,17 @@
             yield return new WaitForSeconds(timeOffsetForConnect);
 
             Connect();
-        } 
+        }
+
+
+        /// <summary>
+        /// At the start of the scene, we launch a delayed connection to the room server
+        /// </summary>
+        private void Start()
+        {
+            StartCoroutine(WaitForConnection());
+            InvokeRepeating(nameof(CheckConnection), timeCheckForConnect, timeCheckForConnect);
+        }
         #endregion
     }
 }

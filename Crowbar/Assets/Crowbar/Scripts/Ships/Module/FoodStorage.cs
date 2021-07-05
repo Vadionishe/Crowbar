@@ -15,17 +15,18 @@ namespace Crowbar.Ship
 
         public Color PickColor = Color.green;
 
-        private Color m_colorMain;
+        private Color m_colorMain = Color.white;
 
         public void Pick()
         {
-            m_colorMain = GetComponent<SpriteRenderer>().color;
-            GetComponent<SpriteRenderer>().color = PickColor;
+            if (GetComponent<SpriteRenderer>() != null)
+                GetComponent<SpriteRenderer>().color = PickColor;
         }
 
         public void UnPick()
         {
-            GetComponent<SpriteRenderer>().color = m_colorMain;
+            if (GetComponent<SpriteRenderer>() != null)
+                GetComponent<SpriteRenderer>().color = m_colorMain;
         }
 
         [Server]

@@ -33,7 +33,8 @@
                 StartCoroutine(Cooldown());
                 controllerGun.ChangeBullet(-1);
 
-                ShipBullet bullet = Instantiate(bulletPrefab, spawnBulletPosition.transform.position, Quaternion.identity, null);
+                Vector3 position = spawnBulletPosition.transform.position + new Vector3(0, 0, 0.0001f);
+                ShipBullet bullet = Instantiate(bulletPrefab, position, Quaternion.identity, null);
 
                 NetworkServer.Spawn(bullet.gameObject);
                 bullet.Push(spawnBulletPosition.transform.right * speedShot);              

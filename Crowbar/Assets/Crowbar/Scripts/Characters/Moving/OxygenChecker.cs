@@ -1,10 +1,16 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 
 namespace Crowbar
 {
     public class OxygenChecker : MonoBehaviour, ICollisionChecker
     {
         public float valueInhale = 1f;
+
+        private Water currentWater;
+        private List<Water> waters;
+        private List<Water> collisionWaters;
 
         public Place place;
         public Character character;
@@ -49,54 +55,62 @@ namespace Crowbar
 
         private void Start()
         {
+            collisionWaters = new List<Water>();
+
             character = GetComponentInParent<Character>();
+            waters = FindObjectsOfType<Water>().ToList();
         }
 
-        private void OnTriggerStay2D(Collider2D collision)
+        private void Update()
         {
-            SetPlace(collision, true);
-            SetWater(collision, true);
+            if (character.transform.parent == null)
+            {
+                place = null;
+                currentWater = waters.Find(w => w.waterParent == null);
+            }
+            else
+            {
+                place = character.transform.parent.GetComponent<Place>();
+
+                if (place.openAir)
+                {
+                    currentWater = waters.Find(w => w.waterParent == null);
+                }
+                else
+                {
+                    currentWater = place.water;
+                }
+            }
+
+            foreach (Water water in collisionWaters)
+            {
+                if (water == currentWater)
+                {
+                    inWater = true;
+
+                    return;
+                }
+            }
+
+            inWater = false;
         }
 
-        private void OnTriggerExit2D(Collider2D collision)
-        {
-            SetPlace(collision, false);
-            SetWater(collision, false);
-        }
-
-        private void SetPlace(Collider2D collision, bool enter)
-        {
-            Place place = collision.GetComponent<Place>();
-
-            if (place != null)
-                this.place = (enter) ? place : null;
-        }
-
-        private void SetWater(Collider2D collision, bool enter)
+        private void OnTriggerEnter2D(Collider2D collision)
         {
             Water water = collision.GetComponent<Water>();
 
             if (water != null)
-            {
-                if (place != null)
-                {
-                    if (place.openAir)
-                    {
-                        inWater = true;
-                    }
-                    else
-                    {
-                        if (place.water == water)
-                            inWater = true;
-                        else
-                            inWater = false;
-                    }
-                }
-                else
-                {
-                    inWater = enter;
-                }
-            }
-        }           
+                if (!collisionWaters.Contains(water))
+                    collisionWaters.Add(water);
+        }
+
+        private void OnTriggerExit2D(Collider2D collision)
+        {
+            Water water = collision.GetComponent<Water>();
+
+            if (water != null)
+                if (collisionWaters.Contains(water))
+                    collisionWaters.Remove(water);
+        }
     }
 }

@@ -12,6 +12,7 @@ namespace Crowbar
         {
             public GameObject prefab;
             public int maxCount;
+            public int minCount;
             [Range(0, 1f)]
             public float chance;
         }
@@ -34,7 +35,7 @@ namespace Crowbar
                 foreach (Resources resources in resources)
                 {
                     float chance = Random.Range(0, 1f);
-                    int count = Random.Range(1, resources.maxCount + 1);
+                    int count = Random.Range(resources.minCount, resources.maxCount + 1);
 
                     if (chance < resources.chance)
                     {

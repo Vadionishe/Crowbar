@@ -28,7 +28,7 @@
 
         public Color PickColor = Color.green;
 
-        private Color m_colorMain;
+        private Color m_colorMain = Color.white;
         private NetworkIdentity m_usingCharacter;
         private PlayerInputForServer m_playerInput;
         #endregion
@@ -36,13 +36,14 @@
         #region Fuctions
         public void Pick()
         {
-            m_colorMain = GetComponent<SpriteRenderer>().color;
-            GetComponent<SpriteRenderer>().color = PickColor;
+            if (GetComponent<SpriteRenderer>())
+                GetComponent<SpriteRenderer>().color = PickColor;
         }
 
         public void UnPick()
         {
-            GetComponent<SpriteRenderer>().color = m_colorMain;
+            if (GetComponent<SpriteRenderer>())
+                GetComponent<SpriteRenderer>().color = m_colorMain;
         }
 
         [Client]

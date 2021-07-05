@@ -41,7 +41,8 @@ namespace Crowbar
                             pickObject = nearestHit.transform.gameObject;
                             pickInfo = info;
 
-                            pickInfo.Pick();
+                            if (pickObject != null)
+                                pickInfo.Pick();
                         }
                     }
                     else
