@@ -3,6 +3,7 @@
     using UnityEngine;
     using Mirror;
     using Crowbar.Item;
+    using System.Collections;
 
     /// <summary>
     /// Using controller for player character
@@ -19,6 +20,9 @@
         public KeyCode keyUsing = KeyCode.E;
         [Tooltip("Key for drop")]
         public KeyCode keyDrop = KeyCode.Q;
+
+        public float cooldownItemGrab = 0.3f;
+        public bool canItemGrab = true;
         #endregion
 
         #region Fuctions
@@ -50,6 +54,12 @@
 
             if (item != null)
                 item.Drop(netIdentity);
+        }
+
+        [Server]
+        public void SetCooldownGrab()
+        {
+            StartCoroutine(CooldownItemGrab());
         }
 
         /// <summary>
@@ -93,6 +103,15 @@
 
             return null;
         }
+
+        private IEnumerator CooldownItemGrab()
+        {
+            canItemGrab = false;
+
+            yield return new WaitForSeconds(cooldownItemGrab);
+
+            canItemGrab = true;
+        } 
         #endregion
     }
 }

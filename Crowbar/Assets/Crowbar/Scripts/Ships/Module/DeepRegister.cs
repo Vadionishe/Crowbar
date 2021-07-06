@@ -15,18 +15,22 @@ namespace Crowbar
 
         public void Pick()
         {
-            GetComponent<SpriteRenderer>().color = PickColor;
+            if (GetComponent<SpriteRenderer>())
+                GetComponent<SpriteRenderer>().color = PickColor;
 
             foreach (SpriteRenderer renderer in GetComponentsInChildren<SpriteRenderer>())
-                renderer.color = PickColor;
+                if (renderer != null)
+                    renderer.color = PickColor;
         }
 
         public void UnPick()
         {
-            GetComponent<SpriteRenderer>().color = m_colorMain;
+            if (GetComponent<SpriteRenderer>())
+                GetComponent<SpriteRenderer>().color = m_colorMain;
 
             foreach (SpriteRenderer renderer in GetComponentsInChildren<SpriteRenderer>())
-                renderer.color = m_colorMain;
+                if (renderer != null)
+                    renderer.color = m_colorMain;
         }
 
         public void Use(NetworkIdentity usingCharacter)

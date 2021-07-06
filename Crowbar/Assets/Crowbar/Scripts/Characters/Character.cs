@@ -72,8 +72,8 @@
         {
             base.OnStopClient();
 
-            GameUI.SetLoadScreen(true);
-            FindObjectOfType<ClientGame>().Disconnect();
+            //GameUI.SetLoadScreen(true);
+            //FindObjectOfType<ClientGame>().Disconnect();
         }
 
         public override void OnStopServer()

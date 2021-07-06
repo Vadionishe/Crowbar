@@ -135,12 +135,15 @@ namespace Crowbar.Ship
         {
             if (!isServer)
             {
-                if (collision.gameObject == waterPlace.gameObject)
-                    isCollideWaterShip = true;
+                if (collision != null && waterPlace != null)
+                {
+                    if (collision.gameObject == waterPlace.gameObject)
+                        isCollideWaterShip = true;
 
-                if (collision.GetComponent<Water>() != null)
-                    if (collision.GetComponent<Water>().waterParent == null)
-                        isCollideWaterGlobal = true;
+                    if (collision.GetComponent<Water>() != null)
+                        if (collision.GetComponent<Water>().waterParent == null)
+                            isCollideWaterGlobal = true;
+                }
             }
         }
 
@@ -148,12 +151,15 @@ namespace Crowbar.Ship
         {
             if (!isServer)
             {
-                if (collision.gameObject == waterPlace.gameObject)
-                    isCollideWaterShip = false;
+                if (collision != null && waterPlace != null) 
+                {
+                    if (collision.gameObject == waterPlace.gameObject)
+                        isCollideWaterShip = false;
 
-                if (collision.GetComponent<Water>() != null)
-                    if (collision.GetComponent<Water>().waterParent == null)
-                        isCollideWaterGlobal = false;
+                    if (collision.GetComponent<Water>() != null)
+                        if (collision.GetComponent<Water>().waterParent == null)
+                            isCollideWaterGlobal = false;
+                }
             }
         }
 

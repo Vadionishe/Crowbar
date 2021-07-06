@@ -18,6 +18,8 @@
         private float timeOffsetForConnect = 5f;
         [Tooltip("Time for the check connection"), SerializeField]
         private float timeCheckForConnect = 10f;
+
+        private bool isChecked;
         #endregion
 
         #region Functions
@@ -49,8 +51,8 @@
         /// </summary>
         private void CheckConnection()
         {
-            if (!NetworkClient.isConnected)
-                SceneManager.LoadScene("Menu");
+            if (!NetworkClient.isConnected && !isChecked)
+                StartCoroutine(WaitCheckConnection());
         }
 
         /// <summary>
@@ -64,6 +66,21 @@
             Connect();
         }
 
+        private IEnumerator WaitCheckConnection()
+        {
+            isChecked = true;
+
+            yield return new WaitForSeconds(10f);
+
+            if (!NetworkClient.isConnected)
+            {
+                SceneManager.LoadScene("Menu");
+            }
+            else
+            {
+                isChecked = false;
+            }
+        }
 
         /// <summary>
         /// At the start of the scene, we launch a delayed connection to the room server

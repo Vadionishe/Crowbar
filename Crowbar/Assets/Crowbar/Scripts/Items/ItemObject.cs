@@ -95,8 +95,9 @@ namespace Crowbar.Item
         public virtual void Grab(NetworkIdentity usingCharacter)
         {
             Character character = usingCharacter.GetComponent<Character>();
+            UsingComponent usingComponent = usingCharacter.GetComponent<UsingComponent>();
 
-            if (character.hand.itemObject == null && !character.isBusy) 
+            if (character.hand.itemObject == null && !character.isBusy && usingComponent.canItemGrab) 
             {
                 canParenting = false;
                 transform.parent = character.hand.handParentPoint;
@@ -112,6 +113,7 @@ namespace Crowbar.Item
                     transform.localEulerAngles = new Vector3(0, 0, handedAngle);
                 }
 
+                usingComponent.SetCooldownGrab();
                 RpcGrabItem(usingCharacter);
             }
         }

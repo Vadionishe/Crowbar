@@ -124,7 +124,7 @@
             Initialize();
         }
 
-        private void LateUpdate()
+        private void Update()
         {
             MoveToTarget();
         }   
