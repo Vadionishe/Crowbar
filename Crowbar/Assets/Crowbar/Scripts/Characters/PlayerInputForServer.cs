@@ -22,6 +22,7 @@
         public class PushEvent : UnityEvent { }
         public PushEvent onClickLeft;
         public PushEvent onPushQ;
+        public PushEvent onPushE;
         #endregion
 
         #region Fuctions
@@ -74,6 +75,15 @@
         }
 
         /// <summary>
+        /// Send event push key E
+        /// </summary>
+        [Command]
+        public void CmdPushE()
+        {
+            onPushE.Invoke();
+        }
+
+        /// <summary>
         /// Send inputs player
         /// </summary>
         public void SendInputs()
@@ -97,6 +107,7 @@
         {
             onClickLeft = new PushEvent();
             onPushQ = new PushEvent();
+            onPushE = new PushEvent();
 
             if (isLocalPlayer)
             {
@@ -115,6 +126,9 @@
 
                 if (Input.GetKeyDown(KeyCode.Q))
                     CmdPushQ();
+
+                if (Input.GetKeyDown(KeyCode.E))
+                    CmdPushE();
             }                
         }
         #endregion

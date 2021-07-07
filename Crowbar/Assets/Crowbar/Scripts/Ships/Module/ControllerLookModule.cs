@@ -73,17 +73,7 @@
         {
             Character character = usingCharacter.GetComponent<Character>();
 
-            if (character.hand.itemObject != null)
-                return;
-
-            if (m_usingCharacter != null)
-            {
-                if (m_usingCharacter == usingCharacter)
-                {
-                    DropControl();
-                }
-            }
-            else if (!character.isBusy)
+            if (m_usingCharacter == null && !character.isBusy && character.hand.itemObject == null)
             {
                 character.isBusy = true;
                 m_usingCharacter = usingCharacter;

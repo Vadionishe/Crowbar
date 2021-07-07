@@ -120,14 +120,7 @@
             }
             else
             {
-                if (m_usingCharacter != null)
-                {
-                    if (m_usingCharacter == usingCharacter)
-                    {
-                        DropControl();                       
-                    }
-                }
-                else if (!character.isBusy)
+                if (!character.isBusy && m_usingCharacter == null)
                 {
                     character.isBusy = true;
                     m_usingCharacter = usingCharacter;

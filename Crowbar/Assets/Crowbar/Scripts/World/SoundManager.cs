@@ -1,13 +1,24 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 
 namespace Crowbar
 {
     public class SoundManager : MonoBehaviour
     {
+        public Slider sliderVolume;
+
         public AudioClip overWaterSound;
         public AudioClip underWaterSound;
 
         public AudioSource audioSource;
+
+        private void Start()
+        {
+            sliderVolume.value = Settings.volume;
+
+            foreach (AudioSource audioSource in FindObjectsOfType<AudioSource>())
+                audioSource.volume = Settings.volume;
+        }
 
         private void Update()
         {

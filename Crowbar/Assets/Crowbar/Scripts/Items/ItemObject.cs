@@ -10,26 +10,20 @@ namespace Crowbar.Item
         public float cooldownAttack;
         public float handedAngle;
         public bool handedForceAngle;
-
         public bool isAttacking;
         public bool onCooldown;
 
         public NetworkIdentity handedCharacter;
-
         public SpriteRenderer rendererItem;
-        public Collider2D colliderItem;        
+        public Collider2D colliderItem;
 
-        public Color PickColor = Color.green;
-
-        private Color m_colorMain;
+        private Color PickColor = Color.green;
+        private Color m_colorMain = Color.white;
 
         public void Pick()
         {
             if (rendererItem != null)
-            {
-                m_colorMain = rendererItem.color;
                 rendererItem.color = PickColor;
-            }
         }
 
         public void UnPick()
@@ -80,6 +74,7 @@ namespace Crowbar.Item
         public virtual void Drop(NetworkIdentity usingCharacter)
         {
             Character character = usingCharacter.GetComponent<Character>();
+            PlayerInputForServer playerInput = usingCharacter.GetComponent<PlayerInputForServer>();
 
             canParenting = true;
             transform.parent = character.transform.parent;
@@ -87,6 +82,7 @@ namespace Crowbar.Item
             handedCharacter = null;
             colliderItem.isTrigger = false;
             GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Dynamic;
+            playerInput.onPushE.RemoveListener(UseItem);
 
             RpcDropItem(usingCharacter);
         }
@@ -96,6 +92,7 @@ namespace Crowbar.Item
         {
             Character character = usingCharacter.GetComponent<Character>();
             UsingComponent usingComponent = usingCharacter.GetComponent<UsingComponent>();
+            PlayerInputForServer playerInput = usingCharacter.GetComponent<PlayerInputForServer>();
 
             if (character.hand.itemObject == null && !character.isBusy && usingComponent.canItemGrab) 
             {
@@ -106,6 +103,7 @@ namespace Crowbar.Item
                 handedCharacter = usingCharacter;
                 colliderItem.isTrigger = true;
                 GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Kinematic;
+                playerInput.onPushE.AddListener(UseItem);
 
                 if (handedForceAngle)
                 {
@@ -116,6 +114,11 @@ namespace Crowbar.Item
                 usingComponent.SetCooldownGrab();
                 RpcGrabItem(usingCharacter);
             }
+        }
+
+        [Server]
+        public virtual void UseItem()
+        {
         }
 
         [Server]
@@ -145,6 +148,19 @@ namespace Crowbar.Item
             yield return new WaitForSeconds(cooldownAttack);
 
             onCooldown = false;
+        }
+
+        private void OnDestroy()
+        {
+            if (isServer)
+            {
+                if (handedCharacter != null)
+                {
+                    PlayerInputForServer playerInput = handedCharacter.GetComponent<PlayerInputForServer>();
+
+                    playerInput.onPushE.RemoveListener(UseItem);
+                }
+            }
         }
     }
 }

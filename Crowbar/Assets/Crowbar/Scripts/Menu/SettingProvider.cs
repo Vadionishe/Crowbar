@@ -18,6 +18,9 @@ namespace Crowbar
         public void SetVolume(float volume)
         {
             Settings.SetVolume(volume);
+
+            foreach (AudioSource audioSource in FindObjectsOfType<AudioSource>())
+                audioSource.volume = Settings.volume;
         }
 
         public void SetRemember(bool isRemember)

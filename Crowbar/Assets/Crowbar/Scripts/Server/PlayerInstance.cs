@@ -13,6 +13,14 @@ namespace Crowbar.Server
         private UIController uIController;
 
         #region Functions
+        public override void OnStopClient()
+        {
+            base.OnStopClient();
+
+            if (isLocalPlayer)
+                uIController.SetMessageScreen("Connection lost! Please, restart game.");
+        }
+
         public void GetRecords(int countRecords)
         {
             CmdGetRecords(countRecords);
