@@ -56,14 +56,14 @@ namespace Crowbar.Ship
 
             underwaterShip.isMove = directionMove != Vector2.zero;
 
-            if (electricStorage.electric >= electricDown && fuelStorage.fuel >= fuelDown && canMove && underwaterShip.isMove)
+            if (electricStorage.electric >= electricDown && fuelStorage.fuel >= fuelDown && canMove)
             {
                 underwaterShip.SetMotorStateServer(MotorRotate.Side.Left, directionMove.x > 0);
                 underwaterShip.SetMotorStateServer(MotorRotate.Side.Right, directionMove.x < 0);
                 underwaterShip.SetMotorStateServer(MotorRotate.Side.Down, directionMove.y > 0);
                 underwaterShip.SetMotorStateServer(MotorRotate.Side.Up, directionMove.y < 0);
 
-                if (m_rigidBody.velocity.magnitude < maxSpeed)
+                if (m_rigidBody.velocity.magnitude < maxSpeed && underwaterShip.isMove)
                 {
                     electricStorage.ChangeElectric(-electricDown);
                     fuelStorage.ChangeFuel(-fuelDown);

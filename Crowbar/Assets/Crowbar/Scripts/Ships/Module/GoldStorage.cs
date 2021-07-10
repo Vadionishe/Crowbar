@@ -16,24 +16,27 @@ namespace Crowbar.Ship
 
         public GoldBox goldPrefab;
 
-        public Color PickColor = Color.green;
-
+        private Color PickColor = Color.green;
         private Color m_colorMain = Color.white;
 
         public void Pick()
         {
-            GetComponent<SpriteRenderer>().color = PickColor;
+            if (GetComponent<SpriteRenderer>() != null)
+                GetComponent<SpriteRenderer>().color = PickColor;
 
             foreach (SpriteRenderer renderer in GetComponentsInChildren<SpriteRenderer>())
-                renderer.color = PickColor;
+                if (renderer != null)
+                    renderer.color = PickColor;
         }
 
         public void UnPick()
         {
-            GetComponent<SpriteRenderer>().color = m_colorMain;
+            if (GetComponent<SpriteRenderer>() != null)
+                GetComponent<SpriteRenderer>().color = m_colorMain;
 
             foreach (SpriteRenderer renderer in GetComponentsInChildren<SpriteRenderer>())
-                renderer.color = m_colorMain;
+                if (renderer != null)
+                    renderer.color = m_colorMain;
         }
 
         [Server]
@@ -67,12 +70,12 @@ namespace Crowbar.Ship
 
                     if (gold >= grabGold)
                     {
-                        goldItem.goldValue = grabGold;
+                        goldItem.SetResource(grabGold);
                         gold -= grabGold;
                     }
                     else
                     {
-                        goldItem.goldValue = gold;
+                        goldItem.SetResource(gold);
                         gold = 0;
                     }
                 }

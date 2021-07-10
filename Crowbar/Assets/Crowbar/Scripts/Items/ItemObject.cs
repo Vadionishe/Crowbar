@@ -92,7 +92,6 @@ namespace Crowbar.Item
         {
             Character character = usingCharacter.GetComponent<Character>();
             UsingComponent usingComponent = usingCharacter.GetComponent<UsingComponent>();
-            PlayerInputForServer playerInput = usingCharacter.GetComponent<PlayerInputForServer>();
 
             if (character.hand.itemObject == null && !character.isBusy && usingComponent.canItemGrab) 
             {
@@ -103,7 +102,7 @@ namespace Crowbar.Item
                 handedCharacter = usingCharacter;
                 colliderItem.isTrigger = true;
                 GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Kinematic;
-                playerInput.onPushE.AddListener(UseItem);
+                StartCoroutine(WaitToListenUse());
 
                 if (handedForceAngle)
                 {
@@ -119,6 +118,13 @@ namespace Crowbar.Item
         [Server]
         public virtual void UseItem()
         {
+            if (handedCharacter == null || !handedCharacter.GetComponent<UsingComponent>().canItemGrab)
+                return;
+        }
+
+        [Server]
+        public virtual void Initialize()
+        {
         }
 
         [Server]
@@ -128,6 +134,15 @@ namespace Crowbar.Item
                 Grab(usingCharacter);
         }
 
+        [Server]
+        public virtual void CheckValidSpawn()
+        {
+            RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, 100f, LayerMask.GetMask("GroundCollision"));
+
+            if (new Vector2(hit.point.x, hit.point.y) == new Vector2(transform.position.x, transform.position.y))
+                NetworkServer.Destroy(gameObject);
+        }
+
         public void Attack()
         {
             StartCoroutine(Cooldown());
@@ -135,7 +150,7 @@ namespace Crowbar.Item
 
         protected void CheckToDestroy()
         {
-            Collider2D[] players = Physics2D.OverlapCircleAll(transform.position, 400f, LayerMask.GetMask("Player"));
+            Collider2D[] players = Physics2D.OverlapCircleAll(transform.position, 600f, LayerMask.GetMask("Player"));
 
             if (players.Length == 0)
                 NetworkServer.Destroy(gameObject);
@@ -148,6 +163,14 @@ namespace Crowbar.Item
             yield return new WaitForSeconds(cooldownAttack);
 
             onCooldown = false;
+        }
+
+        private IEnumerator WaitToListenUse()
+        {
+            yield return new WaitForSeconds(0.4f);
+
+            if (handedCharacter != null)
+                handedCharacter.GetComponent<PlayerInputForServer>().onPushE.AddListener(UseItem);
         }
 
         private void OnDestroy()

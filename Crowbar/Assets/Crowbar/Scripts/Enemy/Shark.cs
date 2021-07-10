@@ -108,6 +108,8 @@ namespace Crowbar.Enemy
             if (isServer)
             {
                 InvokeRepeating(nameof(CheckToDestroy), timerCheckDestroy, timerCheckDestroy);
+
+                CheckValidSpawn();
             }
             else
             {

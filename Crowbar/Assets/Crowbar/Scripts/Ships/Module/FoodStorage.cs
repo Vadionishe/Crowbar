@@ -54,8 +54,8 @@ namespace Crowbar.Ship
             {
                 float needFood = stats.maxFood - stats.food;
 
-                ChangeFood(needFood <= food ? -needFood : -food);
                 stats.ChangeFood(needFood <= food ? needFood : food);
+                ChangeFood(needFood <= food ? -needFood : -food);             
             }
         }
 

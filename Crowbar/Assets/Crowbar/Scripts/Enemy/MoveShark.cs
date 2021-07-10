@@ -17,7 +17,7 @@ namespace Crowbar.Enemy
 
         public UnderwaterShip target;
         public AudioSource audioSource;
-        public Shark shark;
+        public Enemy shark;
 
         public bool isMove;
 

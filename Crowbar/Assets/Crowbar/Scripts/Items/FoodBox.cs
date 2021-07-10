@@ -9,12 +9,20 @@ namespace Crowbar.Item
         public int maxValue;
         public int minValue;
 
+        public void SetResource(float value)
+        {
+            foodValue = value;
+        }
+
+        public override void Initialize()
+        {
+            foodValue = Random.Range(minValue, maxValue + 1);
+        }
+
         private void Start()
         {
             if (isServer)
             {
-                foodValue = Random.Range(minValue, maxValue + 1);
-
                 InvokeRepeating(nameof(CheckToDestroy), 30f, 30f);
             }
             else

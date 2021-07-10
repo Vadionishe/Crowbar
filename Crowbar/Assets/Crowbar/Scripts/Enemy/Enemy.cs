@@ -8,7 +8,6 @@ namespace Crowbar.Enemy
         public Animator animator;
         public NetworkAnimator networkAnimator;
 
-        public bool canDamaged;
         public bool isDied;
 
         public float maxHealth;
@@ -54,6 +53,15 @@ namespace Crowbar.Enemy
             Collider2D[] _players = Physics2D.OverlapCircleAll(transform.position, distanceCheckDestroy * 5, LayerMask.GetMask("Player"));
 
             if (_players.Length == 0)
+                NetworkServer.Destroy(gameObject);
+        }
+
+        [Server]
+        public void CheckValidSpawn()
+        {
+            RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, 100f, LayerMask.GetMask("GroundCollision"));
+
+            if (new Vector2(hit.point.x, hit.point.y) == new Vector2(transform.position.x, transform.position.y))
                 NetworkServer.Destroy(gameObject);
         }
     }

@@ -2,6 +2,7 @@
 using UnityEngine;
 using System;
 using Random = UnityEngine.Random;
+using Crowbar.Item;
 
 namespace Crowbar
 {
@@ -44,6 +45,7 @@ namespace Crowbar
                             GameObject resource = Instantiate(resources.prefab, transform.position, Quaternion.identity, null);
 
                             NetworkServer.Spawn(resource);
+                            resource.GetComponent<ItemObject>().Initialize();
                         }
                     }
                 }    

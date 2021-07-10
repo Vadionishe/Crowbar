@@ -6,15 +6,23 @@ namespace Crowbar.Item
     {
         public float oxygenValue;
 
-        public int maxValue;
-        public int minValue;
+        public float maxValue;
+        public float minValue;
+
+        public void SetResource(float value)
+        {
+            oxygenValue = value;
+        }
+
+        public override void Initialize()
+        {
+            oxygenValue = Random.Range(minValue, maxValue + 1);
+        }
 
         private void Start()
         {
             if (isServer)
             {
-                oxygenValue = Random.Range(minValue, maxValue + 1);
-
                 InvokeRepeating(nameof(CheckToDestroy), 30f, 30f);
             }
             else

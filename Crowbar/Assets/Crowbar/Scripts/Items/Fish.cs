@@ -1,12 +1,18 @@
 ﻿using Mirror;
 using System.Collections;
 using UnityEngine;
+using Crowbar.Ship;
 
 namespace Crowbar.Item
 {
     public class Fish : ItemObject
     {
+        public static int count;
+
         public float foodValue;
+
+        public int maxValue;
+        public int minValue;
 
         public bool isDied;
         public float speedWalk;
@@ -15,21 +21,36 @@ namespace Crowbar.Item
 
         public Rigidbody2D rigidbodyFish;
 
+        public void SetResource(float value)
+        {
+            foodValue = value;
+        }
+
+        public override void Initialize()
+        {
+            foodValue = Random.Range(minValue, maxValue + 1);
+        }
+
+        public override void CheckValidSpawn()
+        {
+            RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, 100f, LayerMask.GetMask("GroundCollision", "PhysicShip"));
+
+            if (new Vector2(hit.point.x, hit.point.y) == new Vector2(transform.position.x, transform.position.y))
+                NetworkServer.Destroy(gameObject);
+        }
+
         [Server]
         public override void UseItem()
         {
             base.UseItem();
 
-            if (handedCharacter != null)
-            {
-                Character character = handedCharacter.GetComponent<Character>();
-                CharacterStats stats = handedCharacter.GetComponent<CharacterStats>();
+            Character character = handedCharacter.GetComponent<Character>();
+            CharacterStats stats = handedCharacter.GetComponent<CharacterStats>();
 
-                character.hand.itemObject = null;
+            character.hand.itemObject = null;
 
-                stats.ChangeFood(foodValue);
-                NetworkServer.Destroy(gameObject);
-            }
+            stats.ChangeFood(foodValue);
+            NetworkServer.Destroy(gameObject);
         }
 
         [Server]
@@ -64,9 +85,10 @@ namespace Crowbar.Item
         {
             isDied = true;
             canParenting = true;
-            rigidbodyFish.bodyType = RigidbodyType2D.Dynamic;
             transform.eulerAngles = new Vector3(0, 0, 180);
             rigidbodyFish.velocity = Vector2.zero;
+
+            count--;
         }
 
         [Server]
@@ -82,7 +104,7 @@ namespace Crowbar.Item
         private void Start()
         {
             rigidbodyFish = GetComponent<Rigidbody2D>();
-            rigidbodyFish.bodyType = RigidbodyType2D.Kinematic;
+            rigidbodyFish.gravityScale = 0;
 
             if (isServer)
             {
@@ -91,6 +113,8 @@ namespace Crowbar.Item
 
                 InvokeRepeating(nameof(CheckToDestroy), 30f, 30f);
                 InvokeRepeating(nameof(SetAngle), 2f, 2f);
+
+                CheckValidSpawn();
             }
             else
             {
@@ -110,6 +134,10 @@ namespace Crowbar.Item
             {
                 Hammer hammer = collision.GetComponent<Hammer>();
                 Water water = collision.GetComponent<Water>();
+                UnderwaterShip ship = collision.GetComponent<UnderwaterShip>();
+
+                if (ship != null)
+                    SetAngle(transform.eulerAngles.z + 180);
 
                 if (hammer != null)
                     if (!hammer.onCooldown && hammer.isAttacking && !isDied)
@@ -118,9 +146,14 @@ namespace Crowbar.Item
                 if (water != null)
                 {
                     if (isDied)
+                    {
                         rigidbodyFish.gravityScale = -0.2f;
-
-                    rigidbodyFish.drag = 10f;
+                        rigidbodyFish.drag = 10f;
+                    }
+                    else
+                    {
+                        rigidbodyFish.gravityScale = 0;
+                    }
                 }
             }
         }
@@ -133,17 +166,19 @@ namespace Crowbar.Item
 
                 if (water != null)
                 {
-                    if (isDied)
-                    {
-                        rigidbodyFish.gravityScale = 1f;
-                        rigidbodyFish.drag = 0.2f;
-                    }
-                    else
-                    {
+                    rigidbodyFish.drag = 0.2f;
+                    rigidbodyFish.gravityScale = 1f;
+
+                    if (!isDied)
                         SetAngle(270f);
-                    }
                 }                    
             }
+        }
+
+        private void OnDestroy()
+        {
+            if (isServer && !isDied)
+                count--;
         }
     }
 }

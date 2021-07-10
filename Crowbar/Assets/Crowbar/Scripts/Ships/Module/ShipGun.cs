@@ -16,11 +16,18 @@
         public ShipBullet bulletPrefab;
         public ControllerShipGun controllerGun;
         public ElectricStorage electricStorage;
+        public ParticleSystem particleShot;
 
         private bool canShot = true;
 
         private Vector3 m_targetRotation;
         private Vector3 m_velocityRotate;
+
+        [ClientRpc]
+        public void RpcShot()
+        {
+            particleShot.Play();
+        }
 
         [Server]
         [ContextMenu("Shot")]
@@ -37,7 +44,9 @@
                 ShipBullet bullet = Instantiate(bulletPrefab, position, Quaternion.identity, null);
 
                 NetworkServer.Spawn(bullet.gameObject);
-                bullet.Push(spawnBulletPosition.transform.right * speedShot);              
+                bullet.Push(spawnBulletPosition.transform.right * speedShot);
+
+                RpcShot();
             }
         }
 

@@ -86,6 +86,8 @@ namespace Crowbar.Enemy
                 Initialize(FindObjectOfType<UnderwaterShip>());
                 Invoke(nameof(DestroySnake), timeToDestroy);
                 InvokeRepeating(nameof(CheckToDestroy), timerCheckDestroy, timerCheckDestroy);
+
+                CheckValidSpawn();
             }
             else
             {

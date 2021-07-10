@@ -13,19 +13,18 @@ namespace Crowbar.Ship
         [SyncVar(hook = nameof(SyncValue))]
         public float oxygen;
 
-        public Color PickColor = Color.green;
-
+        private Color PickColor = Color.green;
         private Color m_colorMain = Color.white;
 
         public void Pick()
         {
-            if (GetComponent<SpriteRenderer>())
+            if (GetComponent<SpriteRenderer>() != null)
                 GetComponent<SpriteRenderer>().color = PickColor;
         }
 
         public void UnPick()
         {
-            if (GetComponent<SpriteRenderer>())
+            if (GetComponent<SpriteRenderer>() != null)
                 GetComponent<SpriteRenderer>().color = m_colorMain;
         }
 

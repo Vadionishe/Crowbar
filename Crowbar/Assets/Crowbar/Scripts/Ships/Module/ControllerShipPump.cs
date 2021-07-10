@@ -12,6 +12,8 @@ namespace Crowbar.Ship
         [Tooltip("Electric storage")]
         public ElectricStorage electricStorage;
         public AudioSource audioSource;
+        public AudioClip upAudio;
+        public AudioClip downAudio;
 
         public float maxPumpHeight = 100f;
         public float minPumpHeight = 0;
@@ -159,15 +161,24 @@ namespace Crowbar.Ship
             pumpUp.transform.position = new Vector3(targetUp.transform.position.x, targetUp.transform.position.y, targetUp.transform.position.z - 0.0001f);
             pump.transform.localScale = new Vector3(pump.transform.localScale.x, scaleY, pump.transform.localScale.z);
 
-            if (!isSoundedPump && pumpHeight == maxPumpHeight)
+            if (pumpHeight >= maxPumpHeight)
             {
-                audioSource.Play();
-                isSoundedPump = true;
+                if (!isSoundedPump)
+                {
+                    audioSource.PlayOneShot(upAudio);
+                    isSoundedPump = true;
+                }
             }
-
-            if (isSoundedPump && pumpHeight == minPumpHeight)
+            else if (pumpHeight <= minPumpHeight)
             {
-                audioSource.Play();
+                if (!isSoundedPump)
+                {
+                    audioSource.PlayOneShot(downAudio);
+                    isSoundedPump = true;
+                }
+            }
+            else
+            {
                 isSoundedPump = false;
             }
         }
@@ -190,10 +201,10 @@ namespace Crowbar.Ship
                 if (m_playerInput != null)
                     pumpHeight = Mathf.Clamp(pumpHeight + m_playerInput.vertical, 0, maxPumpHeight);
 
-                if (pumpHeight <= minPumpHeight)
+                if (pumpHeight >= maxPumpHeight)
                     canWaterPumped = true;
 
-                if (pumpHeight >= maxPumpHeight && canWaterPumped)
+                if (pumpHeight <= minPumpHeight && canWaterPumped)
                 {
                     Pump();
 
