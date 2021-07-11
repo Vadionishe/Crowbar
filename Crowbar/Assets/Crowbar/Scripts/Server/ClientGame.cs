@@ -25,12 +25,14 @@
         #region Functions
         public void Disconnect()
         {
+            GameUI.SetLoadScreen(true);
             NetworkManager.singleton.StopClient();
             SceneManager.LoadScene("Menu");
         }
 
         public void Quit()
         {
+            GameUI.SetLoadScreen(true);
             Application.Quit();
         }
 

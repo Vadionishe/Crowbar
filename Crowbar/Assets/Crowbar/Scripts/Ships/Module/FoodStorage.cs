@@ -46,7 +46,7 @@ namespace Crowbar.Ship
                 if (itemObject as FoodBox)
                 {
                     ChangeFood((itemObject as FoodBox).foodValue);
-                    itemObject.Drop(usingCharacter);
+                    itemObject.Drop(usingCharacter, 0, Vector2.zero);
                     NetworkServer.Destroy(itemObject.gameObject);
                 }
             }

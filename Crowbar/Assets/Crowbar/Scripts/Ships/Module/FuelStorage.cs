@@ -49,7 +49,7 @@ namespace Crowbar.Ship
                 if (itemObject as FuelBox)
                 {
                     ChangeFuel((itemObject as FuelBox).fuelValue);
-                    itemObject.Drop(usingCharacter);
+                    itemObject.Drop(usingCharacter, 0, Vector2.zero);
                     NetworkServer.Destroy(itemObject.gameObject);
                 }
             }

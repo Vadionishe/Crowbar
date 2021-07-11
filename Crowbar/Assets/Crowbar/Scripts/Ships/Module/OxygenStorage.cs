@@ -44,7 +44,7 @@ namespace Crowbar.Ship
                 if (itemObject as OxygenBox)
                 {
                     ChangeOxygen((itemObject as OxygenBox).oxygenValue);
-                    itemObject.Drop(usingCharacter);
+                    itemObject.Drop(usingCharacter, 0, Vector2.zero);
                     NetworkServer.Destroy(itemObject.gameObject);
                 }
             }

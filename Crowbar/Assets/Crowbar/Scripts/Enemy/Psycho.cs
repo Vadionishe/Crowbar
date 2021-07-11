@@ -18,6 +18,7 @@ namespace Crowbar.Enemy
         public float damage = 4f;
 
         public MoveShark moveShark;
+        public AudioSource audioSource;
 
         [Server]
         public void Attack()
@@ -98,6 +99,7 @@ namespace Crowbar.Enemy
             }
             else
             {
+                audioSource.volume = Settings.volume;
                 GetComponent<Collider2D>().isTrigger = true;
             }
         }
@@ -106,6 +108,13 @@ namespace Crowbar.Enemy
         {
             if (isServer)
                 Attack();
+
+            if (!isServer && isDied && audioSource.isPlaying)
+            {
+                audioSource.loop = false;
+
+                audioSource.Stop();
+            }
         }
 
         private void OnTriggerEnter2D(Collider2D collision)

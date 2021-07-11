@@ -30,6 +30,7 @@
                 if (args.Length > 1)
                 {
                     (Transport.activeTransport as TelepathyTransport).port = Convert.ToUInt16(args[1]);
+                    SQLiteDB.DBPath = args[2];
 
                     NetworkManager.singleton.StartServer();
                 }

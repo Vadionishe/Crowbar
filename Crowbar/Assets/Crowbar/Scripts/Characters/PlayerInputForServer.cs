@@ -19,10 +19,11 @@
         public float horizontal { get; private set; }
         public float vertical { get; private set; }
 
-        public class PushEvent : UnityEvent { }
-        public PushEvent onClickLeft;
-        public PushEvent onPushQ;
+        public class PushEventValue: UnityEvent<float> { }
+        public class PushEvent: UnityEvent { }
+        public PushEvent onClickLeft;      
         public PushEvent onPushE;
+        public PushEventValue onPushQ;
         #endregion
 
         #region Fuctions
@@ -71,7 +72,7 @@
         [Command]
         public void CmdPushQ()
         {
-            onPushQ.Invoke();
+            onPushQ.Invoke(0);
         }
 
         /// <summary>
@@ -106,7 +107,7 @@
         private void Start()
         {
             onClickLeft = new PushEvent();
-            onPushQ = new PushEvent();
+            onPushQ = new PushEventValue();
             onPushE = new PushEvent();
 
             if (isLocalPlayer)
@@ -124,7 +125,7 @@
                 if (Input.GetKeyDown(KeyCode.Mouse0))
                     CmdClickLeft();
 
-                if (Input.GetKeyDown(KeyCode.Q))
+                if (Input.GetKeyUp(KeyCode.Q))
                     CmdPushQ();
 
                 if (Input.GetKeyDown(KeyCode.E))

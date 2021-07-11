@@ -1,6 +1,7 @@
 ﻿using Crowbar.Item;
 using UnityEngine;
 using Mirror;
+using System;
 
 namespace Crowbar.Ship
 {
@@ -116,12 +117,19 @@ namespace Crowbar.Ship
         private void Start()
         {
             if (!isServer)
-            {                
-                waterPlace = GetComponentInParent<UnderwaterShip>().water;
-                audioSource.volume = Settings.volume;
+            {
+                try
+                {
+                    waterPlace = GetComponentInParent<UnderwaterShip>().water;
+                    audioSource.volume = Settings.volume;
 
-                audioSource.PlayOneShot(crashSound);
-                particle.Play();
+                    audioSource.PlayOneShot(crashSound);
+                    particle.Play();
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError(e);
+                }
             }
         }
 
@@ -135,14 +143,21 @@ namespace Crowbar.Ship
         {
             if (!isServer)
             {
-                if (collision != null && waterPlace != null)
+                try
                 {
-                    if (collision.gameObject == waterPlace.gameObject)
-                        isCollideWaterShip = true;
+                    if (collision != null && waterPlace != null)
+                    {
+                        if (collision.gameObject == waterPlace.gameObject)
+                            isCollideWaterShip = true;
 
-                    if (collision.GetComponent<Water>() != null)
-                        if (collision.GetComponent<Water>().waterParent == null)
-                            isCollideWaterGlobal = true;
+                        if (collision.GetComponent<Water>() != null)
+                            if (collision.GetComponent<Water>().waterParent == null)
+                                isCollideWaterGlobal = true;
+                    }
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError(e);
                 }
             }
         }
@@ -151,14 +166,21 @@ namespace Crowbar.Ship
         {
             if (!isServer)
             {
-                if (collision != null && waterPlace != null) 
+                try
                 {
-                    if (collision.gameObject == waterPlace.gameObject)
-                        isCollideWaterShip = false;
+                    if (collision != null && waterPlace != null)
+                    {
+                        if (collision.gameObject == waterPlace.gameObject)
+                            isCollideWaterShip = false;
 
-                    if (collision.GetComponent<Water>() != null)
-                        if (collision.GetComponent<Water>().waterParent == null)
-                            isCollideWaterGlobal = false;
+                        if (collision.GetComponent<Water>() != null)
+                            if (collision.GetComponent<Water>().waterParent == null)
+                                isCollideWaterGlobal = false;
+                    }
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError(e);
                 }
             }
         }

@@ -37,6 +37,18 @@ namespace Crowbar
         }
 
         [Serializable]
+        public class SpawnerFishHeal
+        {
+            [Header("Spawn fish heal properties")]
+            public int maxCounts = 10;
+            [Range(0, 1f)]
+            public float percentChance = 0.2f;
+            public float spawnPositionY = -55f;
+            public float distanceSpawn = 50f;
+            public FishHealth prefab;
+        }
+
+        [Serializable]
         public class Pressure
         {
             [Header("Pressure properties")]
@@ -76,6 +88,7 @@ namespace Crowbar
         public SpawnerWaterSnake spawnerWaterSnake;
         public SpawnerShark spawnerShark;
         public SpawnerFish spawnerFish;
+        public SpawnerFishHeal spawnerFishHeal;
         public SpawnerPsycho spawnerPsycho;
 
         private void CheckSpawnShark()
@@ -156,6 +169,32 @@ namespace Crowbar
             }
         }
 
+        private void CheckSpawnFishHeal()
+        {
+            float chanceValue = Random.Range(0, 1f);
+
+            if (chanceValue < spawnerFishHeal.percentChance && FishHealth.count < spawnerFishHeal.maxCounts)
+            {
+                foreach (Character character in FindObjectsOfType<Character>())
+                {
+                    if (character.transform.position.y <= spawnerFishHeal.spawnPositionY)
+                    {
+                        float randAng = Random.Range(0, 360);
+                        float x = character.transform.position.x + (spawnerFishHeal.distanceSpawn * Mathf.Cos(randAng / (180f / Mathf.PI)));
+                        float y = character.transform.position.y + (spawnerFishHeal.distanceSpawn * Mathf.Sin(randAng / (180f / Mathf.PI)));
+                        Vector2 spawnPosition = new Vector2(x, y);
+
+                        FishHealth spawnedFish = Instantiate(spawnerFishHeal.prefab, spawnPosition, Quaternion.identity, null);
+
+                        NetworkServer.Spawn(spawnedFish.gameObject);
+                        spawnedFish.Initialize();
+
+                        FishHealth.count++;
+                    }
+                }
+            }
+        }
+
         private void CheckSpawnPsycho()
         {
             float chanceValue = Random.Range(0, 1f);
@@ -206,6 +245,7 @@ namespace Crowbar
             CheckSpawnSnake();
             CheckSpawnShark();
             CheckSpawnFish();
+            CheckSpawnFishHeal();
             CheckSpawnPsycho();
         }
 

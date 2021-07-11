@@ -45,7 +45,7 @@ namespace Crowbar.Ship
                 if (itemObject as Bullet && bullet < maxBullet)
                 {
                     ChangeBullet(1);
-                    itemObject.Drop(usingCharacter);
+                    itemObject.Drop(usingCharacter, 0, Vector2.zero);
                     NetworkServer.Destroy(itemObject.gameObject);
                 }
             }

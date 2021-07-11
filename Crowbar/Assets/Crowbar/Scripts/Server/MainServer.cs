@@ -1,16 +1,16 @@
-﻿namespace Crowbar.Server
+﻿using System.IO;
+using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Net.Sockets;
+using System.Net;
+using UnityEngine;
+using UnityEngine.Events;
+using Mirror;
+
+
+namespace Crowbar.Server
 {
-    using System.Collections;
-    using System.Collections.Generic;
-    using System.Diagnostics;    
-    using System.Net.NetworkInformation;
-    using System.Net;
-    using System.Linq;
-
-    using UnityEngine;
-    using UnityEngine.Events;
-    using Mirror;
-
     /// <summary>
     /// Master server logic to handle and route all client connections
     /// </summary>
@@ -31,9 +31,10 @@
 
         public ushort NeedPlayersToStart { get; set; } = 2;
         public ushort NeedPlayersToStartForce { get; set; } = 100;
-        public float timeToStart { get; set; } = 20f;
+        public float TimeToStart { get; set; } = 20f;
 
-        private const string pathGameRoom = @"C:\Users\Validay\Desktop\GameServer\Crowbar.exe";
+        private string pathGameRoom;
+        private string pathConfig;
         #endregion
 
         #region Functions
@@ -58,6 +59,8 @@
             DisconnectHandler.AddListener(OnDisconnectPlayer);
             ReadyHandler.AddListener(OnReadyPlayer);
             DontReadyHandler.AddListener(OnDontReadyPlayer);
+
+            LoadConfig();
 
             NetworkManager.singleton.StartServer();
         }
@@ -151,9 +154,23 @@
             ReadyPlayers.ForEach(player => player.TargetStartGame(player.netIdentity.connectionToClient, ushort.Parse(freePort.ToString())));
             ReadyPlayers.Clear();
 
-            Process.Start(pathGameRoom, $"{freePort}");
+            Process.Start(pathGameRoom, $"{freePort} {SQLiteDB.DBPath}");
 
             StopAllCoroutines();
+        }
+
+        private void LoadConfig()
+        {
+            pathConfig = Directory.GetCurrentDirectory() + "\\Config.txt";
+            string[] settings = File.ReadAllLines(pathConfig);
+
+            SQLiteDB.DBPath = settings[0];
+            pathGameRoom = settings[1];
+            NetworkManager.singleton.networkAddress = settings[2];
+            (Transport.activeTransport as TelepathyTransport).port = ushort.Parse(settings[3]);
+            NeedPlayersToStartForce = ushort.Parse(settings[4]);
+            NeedPlayersToStart = ushort.Parse(settings[5]);
+            TimeToStart = ushort.Parse(settings[6]);
         }
 
         /// <summary>
@@ -162,32 +179,20 @@
         /// <returns></returns>
         private int GetFreePort()
         {
-            int startPort = 1000;
-            int endPort = 10000;
+            TcpListener serverForFreePort = new TcpListener(IPAddress.Loopback, 0);
 
-            bool IsFree(int port)
-            {
-                IPGlobalProperties properties = IPGlobalProperties.GetIPGlobalProperties();
-                IPEndPoint[] listeners = properties.GetActiveTcpListeners();
-                int[] openPorts = listeners.Select(item => item.Port).ToArray();
+            serverForFreePort.Start();
 
-                return openPorts.All(openPort => openPort != port);
-            }
+            int port = ((IPEndPoint)serverForFreePort.LocalEndpoint).Port;
 
-            for (int p = startPort; p < endPort; p++)
-            {
-                if (IsFree(startPort))
-                {
-                    return p;
-                }
-            }
+            serverForFreePort.Stop();
 
-            return -1;
+            return port;
         }
 
         private IEnumerator WaitToStart()
         {
-            yield return new WaitForSeconds(timeToStart);
+            yield return new WaitForSeconds(TimeToStart);
 
             StartGameRoom();
         }

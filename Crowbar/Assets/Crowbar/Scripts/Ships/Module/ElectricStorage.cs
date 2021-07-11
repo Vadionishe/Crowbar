@@ -45,7 +45,7 @@ namespace Crowbar.Ship
                 if (itemObject as ElectricBox)
                 {
                     ChangeElectric((itemObject as ElectricBox).electricValue);
-                    itemObject.Drop(usingCharacter);
+                    itemObject.Drop(usingCharacter, 0, Vector2.zero);
                     NetworkServer.Destroy(itemObject.gameObject);
                 }
             }

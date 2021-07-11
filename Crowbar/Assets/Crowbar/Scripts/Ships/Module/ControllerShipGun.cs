@@ -93,7 +93,7 @@
         /// Drop control module
         /// </summary>
         [Server]
-        public void DropControl()
+        public void DropControl(float value)
         {
             TargetUsing(m_usingCharacter.connectionToClient, m_usingCharacter, true);
             ClearBusyModule();
@@ -114,7 +114,7 @@
                 if (itemObject as Bullet && bullet < maxBullet)
                 {
                     ChangeBullet(1);
-                    itemObject.Drop(usingCharacter);
+                    itemObject.Drop(usingCharacter, 0, Vector2.zero);
                     NetworkServer.Destroy(itemObject.gameObject);
                 }
             }

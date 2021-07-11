@@ -62,7 +62,7 @@ namespace Crowbar
             character.handController.enabled = !died;
 
             if (character.hand.itemObject != null)
-                character.hand.itemObject.Drop(netIdentity);
+                character.hand.itemObject.Drop(netIdentity, 0, Vector2.zero);
 
             TargetDied(netIdentity.connectionToClient, isDied);
             onDied.Invoke(died);

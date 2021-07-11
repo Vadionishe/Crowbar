@@ -20,6 +20,8 @@
         public bool syncRotation = true;
         [Tooltip("Always position Z = 0 (global and local)")]
         public bool alwaysZeroZ = false;
+        [Tooltip("Distance for teleport"), SerializeField]
+        private float distanceTeleport = 10f;
 
         [Tooltip("Rate send package for sync ([1 / sendRate] in sec)"), SerializeField]
         private int sendRate = 10;
@@ -124,15 +126,29 @@
 
             if (transform.parent != null)
             {
-                Vector3 newPos = Vector3.SmoothDamp(transform.localPosition, m_targetPositionLocal, ref m_velocityMove, smoothMove);
+                if (Vector2.Distance(transform.localPosition, m_targetPositionLocal) < distanceTeleport)
+                {
+                    Vector3 newPos = Vector3.SmoothDamp(transform.localPosition, m_targetPositionLocal, ref m_velocityMove, smoothMove);
 
-                transform.localPosition = new Vector3(newPos.x, newPos.y, transform.localPosition.z);
+                    transform.localPosition = new Vector3(newPos.x, newPos.y, transform.localPosition.z);
+                }
+                else
+                {
+                    transform.localPosition = new Vector3(m_targetPositionLocal.x, m_targetPositionLocal.y, transform.localPosition.z);
+                }
             }
             else
             {
-                Vector3 newPos = Vector3.SmoothDamp(transform.position, m_targetPositionLocal, ref m_velocityMove, smoothMove);
+                if (Vector2.Distance(transform.position, m_targetPositionLocal) < distanceTeleport)
+                {
+                    Vector3 newPos = Vector3.SmoothDamp(transform.position, m_targetPositionLocal, ref m_velocityMove, smoothMove);
 
-                transform.position = new Vector3(newPos.x, newPos.y, transform.position.z);
+                    transform.position = new Vector3(newPos.x, newPos.y, transform.position.z);
+                }
+                else
+                {
+                    transform.position = new Vector3(m_targetPositionLocal.x, m_targetPositionLocal.y, transform.localPosition.z);
+                }
             }              
         }
 

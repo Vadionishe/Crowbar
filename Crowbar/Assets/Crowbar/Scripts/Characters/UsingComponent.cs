@@ -21,8 +21,13 @@
         [Tooltip("Key for drop")]
         public KeyCode keyDrop = KeyCode.Q;
 
+        public float force;
+        public float forceUp = 2f;
+        public float maxForce = 100f;
         public float cooldownItemGrab = 0.3f;
         public bool canItemGrab = true;
+
+        private Character m_character;
         #endregion
 
         #region Fuctions
@@ -48,12 +53,12 @@
         /// Send command drop on server
         /// </summary>
         [Command]
-        public void CmdDrop()
+        public void CmdDrop(float forceDrop, Vector2 direction)
         {
             ItemObject item = GetComponent<Character>().hand.itemObject;
 
             if (item != null)
-                item.Drop(netIdentity);
+                item.Drop(netIdentity, forceDrop, direction);
         }
 
         [Server]
@@ -70,20 +75,6 @@
             return enableOnServer;
         }
 
-        private void Update()
-        {
-            if (isLocalPlayer)
-            {
-                if (!GameUI.lockInput)
-                {
-                    if (Input.GetKeyDown(keyUsing))
-                        CmdUse(GetUseObject());
-
-                    if (Input.GetKeyDown(keyDrop))
-                        CmdDrop();
-                }               
-            }            
-        }
 
         [Server]
         private IUse GetUse(NetworkIdentity useObject)
@@ -111,7 +102,41 @@
             yield return new WaitForSeconds(cooldownItemGrab);
 
             canItemGrab = true;
-        } 
+        }
+
+        private void Start()
+        {
+            m_character = GetComponent<Character>();
+        }
+
+        private void Update()
+        {
+            if (isLocalPlayer)
+            {
+                if (!GameUI.lockInput)
+                {
+                    if (Input.GetKeyDown(keyUsing))
+                        CmdUse(GetUseObject());
+
+                    if (Input.GetKey(keyDrop))
+                        force = Mathf.Clamp(force + forceUp, 0, maxForce);
+
+                    if (Input.GetKeyUp(keyDrop))
+                    {
+                        if (m_character != null)
+                        {
+                            Vector2 direction = m_character.avatarController.transform.localScale.x > 0 
+                                ? m_character.handController.transform.right
+                                : -m_character.handController.transform.right;
+
+                            CmdDrop(force, direction);
+
+                            force = 0;
+                        }
+                    }                        
+                }               
+            }            
+        }
         #endregion
     }
 }

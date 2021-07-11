@@ -19,8 +19,6 @@ namespace Crowbar.Item
         public float speedRun;
         public float speed;
 
-        public Rigidbody2D rigidbodyFish;
-
         public void SetResource(float value)
         {
             foodValue = value;
@@ -86,7 +84,7 @@ namespace Crowbar.Item
             isDied = true;
             canParenting = true;
             transform.eulerAngles = new Vector3(0, 0, 180);
-            rigidbodyFish.velocity = Vector2.zero;
+            rigidbodyItem.velocity = Vector2.zero;
 
             count--;
         }
@@ -103,8 +101,8 @@ namespace Crowbar.Item
 
         private void Start()
         {
-            rigidbodyFish = GetComponent<Rigidbody2D>();
-            rigidbodyFish.gravityScale = 0;
+            rigidbodyItem = GetComponent<Rigidbody2D>();
+            rigidbodyItem.gravityScale = 0;
 
             if (isServer)
             {
@@ -125,7 +123,7 @@ namespace Crowbar.Item
         private void FixedUpdate()
         {
             if (!isDied)
-                rigidbodyFish.velocity = transform.right * speed;
+                rigidbodyItem.velocity = transform.right * speed;
         }
 
         private void OnTriggerEnter2D(Collider2D collision)
@@ -147,12 +145,12 @@ namespace Crowbar.Item
                 {
                     if (isDied)
                     {
-                        rigidbodyFish.gravityScale = -0.2f;
-                        rigidbodyFish.drag = 10f;
+                        rigidbodyItem.gravityScale = -0.2f;
+                        rigidbodyItem.drag = 10f;
                     }
                     else
                     {
-                        rigidbodyFish.gravityScale = 0;
+                        rigidbodyItem.gravityScale = 0;
                     }
                 }
             }
@@ -166,8 +164,8 @@ namespace Crowbar.Item
 
                 if (water != null)
                 {
-                    rigidbodyFish.drag = 0.2f;
-                    rigidbodyFish.gravityScale = 1f;
+                    rigidbodyItem.drag = 0.2f;
+                    rigidbodyItem.gravityScale = 1f;
 
                     if (!isDied)
                         SetAngle(270f);

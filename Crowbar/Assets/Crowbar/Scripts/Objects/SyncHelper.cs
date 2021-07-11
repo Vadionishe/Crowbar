@@ -9,8 +9,10 @@ namespace Crowbar
 
         public static void SetParent(GameObject syncObject, NetworkIdentity parent)
         {
-            if (syncObject != null && syncObject.activeSelf)
+            if (syncObject != null)
+            {
                 syncObject.transform.SetParent((parent != null) ? parent.transform : null);
+            }
         }
 
         [Server]

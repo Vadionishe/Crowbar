@@ -79,7 +79,7 @@
         public override void OnStopServer()
         {
             if (hand.itemObject != null)
-                hand.itemObject.Drop(netIdentity);
+                hand.itemObject.Drop(netIdentity, 0, Vector2.zero);
 
             base.OnStopServer(); 
         }

@@ -3,6 +3,7 @@ using Crowbar.Item;
 using Crowbar.Server;
 using Mirror;
 using System.Linq;
+using UnityEngine;
 
 namespace Crowbar
 {
@@ -18,7 +19,7 @@ namespace Crowbar
                 if (itemObject as GoldBox)
                 {
                     ChangeGold((itemObject as GoldBox).goldValue);
-                    itemObject.Drop(usingCharacter);
+                    itemObject.Drop(usingCharacter, 0, Vector2.zero);
                     NetworkServer.Destroy(itemObject.gameObject);
 
                     AddGoldToAccounts((itemObject as GoldBox).goldValue);

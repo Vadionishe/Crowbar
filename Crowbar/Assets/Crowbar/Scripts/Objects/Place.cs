@@ -52,49 +52,62 @@ namespace Crowbar
 
         private void OnParenting(GameObject syncObject, ActionTrigger actionTrigger)
         {
-            if (syncObject.transform.parent == transform && actionTrigger == ActionTrigger.Enter)
-                return;
-
             WorldObject worldObject = syncObject.transform.GetComponent<WorldObject>();
-            
-            if ((worldObject != null && !worldObject.canParenting) || worldObject == null)
-                return;
-
-            NetworkIdentity syncObjectIdentity = null;
-            NetworkIdentity parentIdentity = null;            
             SyncPosition syncPosition = syncObject.transform.GetComponent<SyncPosition>();
+            NetworkIdentity syncObjectIdentity = null;
+            NetworkIdentity parentIdentity = null;
+
+            if (actionTrigger == ActionTrigger.Enter)
+                parentIdentity = netIdentity;
+
+            if (IsValidToParent(syncObject, actionTrigger, out syncObjectIdentity))
+            {
+                onParenting.Invoke(worldObject, parentIdentity != null);
+
+                if (isServer)
+                {
+                    if (syncPosition.isServerObject && worldObject.canParenting)
+                    {
+                        SyncHelper.SetParent(worldObject.gameObject, parentIdentity);
+                    }
+                }
+                else
+                {
+                    if (syncObjectIdentity.isLocalPlayer && syncObject.CompareTag("Player"))
+                    {
+                        SyncHelper.SetParent(worldObject.gameObject, parentIdentity);
+                    }
+                }
+
+                syncObject.transform.localPosition = new Vector3(worldObject.transform.localPosition.x, worldObject.transform.localPosition.y, positionZ);
+            }
+        }
+
+        private bool IsValidToParent(GameObject syncObject, ActionTrigger actionTrigger, out NetworkIdentity syncObjectIdentity)
+        {           
+            WorldObject worldObject = syncObject.transform.GetComponent<WorldObject>();
+            SyncPosition syncPosition = syncObject.transform.GetComponent<SyncPosition>();
+
+            syncObjectIdentity = null;
+
+            if (syncObject.transform.parent == transform && actionTrigger == ActionTrigger.Enter)
+                return false;
+
+            if ((worldObject != null && !worldObject.canParenting) || worldObject == null)
+                return false;
 
             if (actionTrigger == ActionTrigger.Enter)
             {
-                parentIdentity = netIdentity;
-
                 if (gameObject.transform.parent != null)
                     if (gameObject.transform.parent.GetComponent<Place>() != null)
                         if (gameObject.transform.parent.GetComponent<Place>().priority >= priority)
-                            return;
+                            return false;
             }
 
             if (!syncObject.TryGetComponent(out syncObjectIdentity) || syncPosition == null || worldObject == null)
-                return;
+                return false;
 
-            onParenting.Invoke(worldObject, parentIdentity != null);
-
-            if (isServer)
-            {
-                if (syncPosition.isServerObject && worldObject.canParenting)
-                {                    
-                    SyncHelper.SetParent(worldObject.gameObject, parentIdentity);
-                }
-            }
-            else
-            {
-                if (syncObjectIdentity.isLocalPlayer && syncObject.CompareTag("Player"))
-                {
-                    SyncHelper.SetParent(worldObject.gameObject, parentIdentity);
-                }
-            }
-
-            syncObject.transform.localPosition = new Vector3(worldObject.transform.localPosition.x, worldObject.transform.localPosition.y, positionZ);
+            return true;
         }
     }
 }

@@ -64,7 +64,7 @@ namespace Crowbar.Ship
         /// Drop control module
         /// </summary>
         [Server]
-        public void DropControl()
+        public void DropControl(float value)
         {
             TargetUsing(m_usingCharacter.connectionToClient, m_usingCharacter, true);
             ClearBusyModule();

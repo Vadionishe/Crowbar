@@ -5,7 +5,7 @@ namespace Crowbar.Server
 {
     public static class SQLiteDB
     {
-        private static readonly string DBPath = @"C:\Users\Validay\Desktop\Crowbar.db";
+        public static string DBPath;
 
         public static void ExecuteRequestWithoutAnswer(string query)
         {

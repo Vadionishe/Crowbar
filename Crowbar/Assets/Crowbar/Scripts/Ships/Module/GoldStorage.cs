@@ -55,7 +55,7 @@ namespace Crowbar.Ship
                 if (itemObject as GoldBox)
                 {
                     ChangeGold((itemObject as GoldBox).goldValue);
-                    itemObject.Drop(usingCharacter);
+                    itemObject.Drop(usingCharacter, 0, Vector2.zero);
                     NetworkServer.Destroy(itemObject.gameObject);
                 }
             }

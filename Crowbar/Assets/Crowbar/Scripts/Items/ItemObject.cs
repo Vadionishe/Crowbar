@@ -16,6 +16,7 @@ namespace Crowbar.Item
         public NetworkIdentity handedCharacter;
         public SpriteRenderer rendererItem;
         public Collider2D colliderItem;
+        public Rigidbody2D rigidbodyItem;
 
         private Color PickColor = Color.green;
         private Color m_colorMain = Color.white;
@@ -71,7 +72,7 @@ namespace Crowbar.Item
         }
 
         [Server]
-        public virtual void Drop(NetworkIdentity usingCharacter)
+        public virtual void Drop(NetworkIdentity usingCharacter, float force, Vector2 direction)
         {
             Character character = usingCharacter.GetComponent<Character>();
             PlayerInputForServer playerInput = usingCharacter.GetComponent<PlayerInputForServer>();
@@ -83,6 +84,8 @@ namespace Crowbar.Item
             colliderItem.isTrigger = false;
             GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Dynamic;
             playerInput.onPushE.RemoveListener(UseItem);
+
+            rigidbodyItem.AddForce(direction.normalized * force);
 
             RpcDropItem(usingCharacter);
         }
