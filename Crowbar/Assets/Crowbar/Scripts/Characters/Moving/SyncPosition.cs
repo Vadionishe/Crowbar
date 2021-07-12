@@ -29,13 +29,15 @@
         private float smoothMove = 0.1f;
         [Tooltip("Smooth speed for rotation"), SerializeField]
         private float smoothRotate = 0.1f;
-        [Tooltip("Simulate ping"), SerializeField]
-        private float simulatePing = 0f;
-        [Tooltip("Simulate ping"), SerializeField]
-        private float percentLostPacket = 0f;
 
-        private Vector3 m_targetPositionGlobal, m_targetPositionLocal, m_targetRotation;
-        private Vector3 m_velocityMove, m_velocityRotate;
+        [HideInInspector]
+        public bool trueUpdate = true;
+        [HideInInspector]
+        public Vector3 m_targetPositionGlobal, m_targetPositionLocal, m_targetRotation;
+        [HideInInspector]
+        public Vector3 m_velocityMove, m_velocityRotate;
+        [HideInInspector]
+        public Vector3 newPos;
         #endregion
 
         #region Fuctions
@@ -71,8 +73,13 @@
             if (!syncRotation && !syncPosition)
                 return;
 
-            if (gameObject.activeSelf)
-                StartCoroutine(SimulatePing());
+            if (gameObject != null && gameObject.activeSelf && trueUpdate)
+            {
+                if (isServerObject && isServer)
+                    RpcUpdatePosition(transform.position, transform.localPosition, GetParent(), transform.eulerAngles);
+                else if (isLocalPlayer && NetworkClient.isConnected)
+                    CmdUpdatePosition(transform.position, transform.localPosition, GetParent(), transform.eulerAngles);
+            }
         }
 
         [Command]
@@ -128,9 +135,9 @@
             {
                 if (Vector2.Distance(transform.localPosition, m_targetPositionLocal) < distanceTeleport)
                 {
-                    Vector3 newPos = Vector3.SmoothDamp(transform.localPosition, m_targetPositionLocal, ref m_velocityMove, smoothMove);
-
-                    transform.localPosition = new Vector3(newPos.x, newPos.y, transform.localPosition.z);
+                    newPos = Vector3.SmoothDamp(transform.localPosition, m_targetPositionLocal, ref m_velocityMove, smoothMove);
+                    newPos.z = transform.localPosition.z;
+                    transform.localPosition = newPos;
                 }
                 else
                 {
@@ -141,9 +148,9 @@
             {
                 if (Vector2.Distance(transform.position, m_targetPositionLocal) < distanceTeleport)
                 {
-                    Vector3 newPos = Vector3.SmoothDamp(transform.position, m_targetPositionLocal, ref m_velocityMove, smoothMove);
-
-                    transform.position = new Vector3(newPos.x, newPos.y, transform.position.z);
+                    newPos = Vector3.SmoothDamp(transform.position, m_targetPositionLocal, ref m_velocityMove, smoothMove);
+                    newPos.z = transform.localPosition.z;
+                    transform.position = newPos;
                 }
                 else
                 {
@@ -170,22 +177,6 @@
                 return transform.parent.GetComponent<NetworkIdentity>();
 
             return null;
-        }
-
-        private IEnumerator SimulatePing()
-        {
-            yield return new WaitForSeconds(simulatePing);
-
-            if (gameObject != null && gameObject.activeSelf)
-            {
-                if (percentLostPacket < Random.Range(0, 1f))
-                {
-                    if (isServerObject && isServer)
-                        RpcUpdatePosition(transform.position, transform.localPosition, GetParent(), transform.eulerAngles);
-                    else if (isLocalPlayer && NetworkClient.isConnected)
-                        CmdUpdatePosition(transform.position, transform.localPosition, GetParent(), transform.eulerAngles);
-                }
-            }
         }
         #endregion
     }

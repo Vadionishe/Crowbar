@@ -114,7 +114,7 @@
                 if (itemObject as Bullet && bullet < maxBullet)
                 {
                     ChangeBullet(1);
-                    itemObject.Drop(usingCharacter, 0, Vector2.zero);
+                    itemObject.Drop(usingCharacter, 0, Vector2.zero, Vector2.zero);
                     NetworkServer.Destroy(itemObject.gameObject);
                 }
             }

@@ -1,7 +1,7 @@
-﻿namespace Crowbar
-{
-    using UnityEngine;
+﻿using UnityEngine;
 
+namespace Crowbar
+{
     public class LayerManager : MonoBehaviour
     {
         public static LayerManager instance;
@@ -14,7 +14,6 @@
         public float shipLayerIn = -2;
         public float shipLayerOut = 0;
         
-
         private void Awake()
         {
             instance = this;

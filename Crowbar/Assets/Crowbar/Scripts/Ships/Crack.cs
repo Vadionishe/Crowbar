@@ -39,10 +39,10 @@ namespace Crowbar.Ship
             audioSource.PlayOneShot(repaireSound);
         }
 
-        [Server]
-        public void RepairOne(int value)
+        [Command(ignoreAuthority = true)]
+        public void CmdRepairOne()
         {
-            curHealth -= value;
+            curHealth--;
 
             if (curHealth <= 0)
             {
@@ -103,13 +103,14 @@ namespace Crowbar.Ship
         private void CheckRepair(Collider2D collision)
         {
             Hammer hammer = collision.GetComponent<Hammer>();
+            HandController hand = GameUI.localStats.GetComponent<Character>().handController;
 
             if (hammer != null)
             {
-                if (!hammer.onCooldown && hammer.isAttacking)
+                if (!hammer.onCooldown && hand.isAttack && hammer.handedCharacter == GameUI.localStats.netIdentity)
                 {
                     hammer.Attack();
-                    RepairOne(hammer.damage);
+                    CmdRepairOne();
                 }
             }
         }
@@ -189,7 +190,10 @@ namespace Crowbar.Ship
         {
             if (isServer)
             {
-                CheckWater(collision);
+                CheckWater(collision);               
+            }
+            else
+            {
                 CheckRepair(collision);
             }
         }

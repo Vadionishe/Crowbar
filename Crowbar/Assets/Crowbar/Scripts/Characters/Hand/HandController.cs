@@ -1,7 +1,7 @@
-﻿namespace Crowbar
-{
-    using UnityEngine;
+﻿using UnityEngine;
 
+namespace Crowbar
+{
     public class HandController : MonoBehaviour
     {
         public float angleHandAttack;

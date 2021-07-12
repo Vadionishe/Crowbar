@@ -24,8 +24,8 @@
         public float force;
         public float forceUp = 2f;
         public float maxForce = 100f;
-        public float cooldownItemGrab = 0.3f;
-        public bool canItemGrab = true;
+        public float cooldownUse = 0.3f;
+        public bool canUse = true;
 
         private Character m_character;
         #endregion
@@ -58,13 +58,7 @@
             ItemObject item = GetComponent<Character>().hand.itemObject;
 
             if (item != null)
-                item.Drop(netIdentity, forceDrop, direction);
-        }
-
-        [Server]
-        public void SetCooldownGrab()
-        {
-            StartCoroutine(CooldownItemGrab());
+                item.Drop(netIdentity, forceDrop, direction, transform.localPosition);
         }
 
         /// <summary>
@@ -95,13 +89,13 @@
             return null;
         }
 
-        private IEnumerator CooldownItemGrab()
+        private IEnumerator CooldownUse()
         {
-            canItemGrab = false;
+            canUse = false;
 
-            yield return new WaitForSeconds(cooldownItemGrab);
+            yield return new WaitForSeconds(cooldownUse);
 
-            canItemGrab = true;
+            canUse = true;
         }
 
         private void Start()
@@ -115,8 +109,11 @@
             {
                 if (!GameUI.lockInput)
                 {
-                    if (Input.GetKeyDown(keyUsing))
+                    if (Input.GetKeyDown(keyUsing) && canUse)
+                    {
+                        StartCoroutine(CooldownUse());
                         CmdUse(GetUseObject());
+                    }
 
                     if (Input.GetKey(keyDrop))
                         force = Mathf.Clamp(force + forceUp, 0, maxForce);

@@ -71,15 +71,12 @@
         public override void OnStopClient()
         {
             base.OnStopClient();
-
-            //GameUI.SetLoadScreen(true);
-            //FindObjectOfType<ClientGame>().Disconnect();
         }
 
         public override void OnStopServer()
         {
             if (hand.itemObject != null)
-                hand.itemObject.Drop(netIdentity, 0, Vector2.zero);
+                hand.itemObject.Drop(netIdentity, 0, Vector2.zero, transform.localPosition);
 
             base.OnStopServer(); 
         }

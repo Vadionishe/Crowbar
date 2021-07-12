@@ -1,9 +1,9 @@
-﻿namespace Crowbar.Ship
-{
-    using System.Collections;
-    using UnityEngine;
-    using Mirror;
+﻿using System.Collections;
+using UnityEngine;
+using Mirror;
 
+namespace Crowbar.Ship
+{
     public class ShipGun : NetworkBehaviour
     {
         public float cooldown = 1.5f;
@@ -14,6 +14,7 @@
 
         public Transform spawnBulletPosition;
         public ShipBullet bulletPrefab;
+        public UnderwaterShip ship;
         public ControllerShipGun controllerGun;
         public ElectricStorage electricStorage;
         public ParticleSystem particleShot;
@@ -44,6 +45,7 @@
                 ShipBullet bullet = Instantiate(bulletPrefab, position, Quaternion.identity, null);
 
                 NetworkServer.Spawn(bullet.gameObject);
+                bullet.OffCollisionShip(ship.netIdentity);
                 bullet.Push(spawnBulletPosition.transform.right * speedShot);
 
                 RpcShot();

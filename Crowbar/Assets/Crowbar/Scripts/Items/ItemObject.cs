@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Crowbar.Item
 {
     public abstract class ItemObject : WorldObject, IUse, IPickInfo
-    {      
+    {
         public int damage;
         public float cooldownAttack;
         public float handedAngle;
@@ -14,6 +14,7 @@ namespace Crowbar.Item
         public bool onCooldown;
 
         public NetworkIdentity handedCharacter;
+        public SyncPosition syncPosition;
         public SpriteRenderer rendererItem;
         public Collider2D colliderItem;
         public Rigidbody2D rigidbodyItem;
@@ -72,19 +73,19 @@ namespace Crowbar.Item
         }
 
         [Server]
-        public virtual void Drop(NetworkIdentity usingCharacter, float force, Vector2 direction)
+        public virtual void Drop(NetworkIdentity usingCharacter, float force, Vector2 direction, Vector2 position)
         {
             Character character = usingCharacter.GetComponent<Character>();
             PlayerInputForServer playerInput = usingCharacter.GetComponent<PlayerInputForServer>();
 
             canParenting = true;
+            syncPosition.trueUpdate = true;
             transform.parent = character.transform.parent;
             character.hand.itemObject = null;
             handedCharacter = null;
             colliderItem.isTrigger = false;
             GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Dynamic;
             playerInput.onPushE.RemoveListener(UseItem);
-
             rigidbodyItem.AddForce(direction.normalized * force);
 
             RpcDropItem(usingCharacter);
@@ -94,9 +95,8 @@ namespace Crowbar.Item
         public virtual void Grab(NetworkIdentity usingCharacter)
         {
             Character character = usingCharacter.GetComponent<Character>();
-            UsingComponent usingComponent = usingCharacter.GetComponent<UsingComponent>();
 
-            if (character.hand.itemObject == null && !character.isBusy && usingComponent.canItemGrab) 
+            if (character.hand.itemObject == null && !character.isBusy) 
             {
                 canParenting = false;
                 transform.parent = character.hand.handParentPoint;
@@ -113,7 +113,6 @@ namespace Crowbar.Item
                     transform.localEulerAngles = new Vector3(0, 0, handedAngle);
                 }
 
-                usingComponent.SetCooldownGrab();
                 RpcGrabItem(usingCharacter);
             }
         }
@@ -121,7 +120,7 @@ namespace Crowbar.Item
         [Server]
         public virtual void UseItem()
         {
-            if (handedCharacter == null || !handedCharacter.GetComponent<UsingComponent>().canItemGrab)
+            if (handedCharacter == null || !handedCharacter.GetComponent<UsingComponent>().canUse)
                 return;
         }
 
@@ -146,12 +145,26 @@ namespace Crowbar.Item
                 NetworkServer.Destroy(gameObject);
         }
 
+        public virtual void CheckToSleep()
+        {
+            if (rigidbodyItem.velocity.y < 1f && !rigidbodyItem.isKinematic)
+            {
+                RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, 2f, LayerMask.GetMask("GroundCollision"));
+
+                if (hit.collider != null)
+                {
+                    rigidbodyItem.isKinematic = true;
+                    syncPosition.trueUpdate = false;
+                }
+            }
+        }
+
         public void Attack()
         {
             StartCoroutine(Cooldown());
         }
 
-        protected void CheckToDestroy()
+        protected virtual void CheckToDestroy()
         {
             Collider2D[] players = Physics2D.OverlapCircleAll(transform.position, 600f, LayerMask.GetMask("Player"));
 

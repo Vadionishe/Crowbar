@@ -24,6 +24,7 @@ namespace Crowbar.Item
             if (isServer)
             {
                 InvokeRepeating(nameof(CheckToDestroy), 30f, 30f);
+                InvokeRepeating(nameof(CheckToSleep), 2f, 2f);
             }
             else
             {

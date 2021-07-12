@@ -64,18 +64,30 @@ namespace Crowbar.Item
             }
         }
 
+        public override void CheckToSleep()
+        {
+            if (isDied)
+                base.CheckToSleep();
+        }
+
         [Server]
         public void SetAngle()
         {
             if (!isDied)
+            {
                 transform.eulerAngles = new Vector3(0, 0, Random.Range(0, 360));
+                rigidbodyItem.velocity = transform.right * speed;
+            }
         }
 
         [Server]
         public void SetAngle(float angle)
         {
             if (!isDied)
+            {
                 transform.eulerAngles = new Vector3(0, 0, angle);
+                rigidbodyItem.velocity = transform.right * speed;
+            }
         }
 
         [Server]
@@ -108,9 +120,11 @@ namespace Crowbar.Item
             {
                 canParenting = false;
                 speed = speedWalk;
+                rigidbodyItem.velocity = transform.right * speed;
 
                 InvokeRepeating(nameof(CheckToDestroy), 30f, 30f);
                 InvokeRepeating(nameof(SetAngle), 2f, 2f);
+                InvokeRepeating(nameof(CheckToSleep), 2f, 2f);
 
                 CheckValidSpawn();
             }
@@ -118,12 +132,6 @@ namespace Crowbar.Item
             {
                 colliderItem.isTrigger = true;
             }
-        }
-
-        private void FixedUpdate()
-        {
-            if (!isDied)
-                rigidbodyItem.velocity = transform.right * speed;
         }
 
         private void OnTriggerEnter2D(Collider2D collision)

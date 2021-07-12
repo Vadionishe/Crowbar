@@ -7,7 +7,7 @@ using System.Net;
 using UnityEngine;
 using UnityEngine.Events;
 using Mirror;
-
+using System;
 
 namespace Crowbar.Server
 {
@@ -154,7 +154,19 @@ namespace Crowbar.Server
             ReadyPlayers.ForEach(player => player.TargetStartGame(player.netIdentity.connectionToClient, ushort.Parse(freePort.ToString())));
             ReadyPlayers.Clear();
 
-            Process.Start(pathGameRoom, $"{freePort} {SQLiteDB.DBPath}");
+            try
+            {
+                Process gameServer = new Process();
+
+                gameServer.StartInfo = new ProcessStartInfo(pathGameRoom, $"{freePort} {SQLiteDB.DBPath} -batchmode -nographics -logFile");
+                gameServer.StartInfo.UseShellExecute = false;
+
+                gameServer.Start();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.StackTrace.ToString());
+            }
 
             StopAllCoroutines();
         }

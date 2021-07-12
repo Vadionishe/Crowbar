@@ -49,13 +49,13 @@ namespace Crowbar.Ship
                     if (itemObject as BulletBox)
                     {
                         ChangeBullet((itemObject as BulletBox).bulletValue);
-                        itemObject.Drop(usingCharacter, 0, Vector2.zero);
+                        itemObject.Drop(usingCharacter, 0, Vector2.zero, Vector2.zero);
                         NetworkServer.Destroy(itemObject.gameObject);
                     }
                     else if (itemObject as Bullet)
                     {
                         ChangeBullet(1);
-                        itemObject.Drop(usingCharacter, 0, Vector2.zero);
+                        itemObject.Drop(usingCharacter, 0, Vector2.zero, Vector2.zero);
                         NetworkServer.Destroy(itemObject.gameObject);
                     }
                 }

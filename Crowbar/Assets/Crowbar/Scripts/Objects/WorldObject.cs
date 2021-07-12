@@ -1,8 +1,8 @@
-﻿namespace Crowbar
-{
-    using Mirror;
-    using UnityEngine;
+﻿using Mirror;
+using UnityEngine;
 
+namespace Crowbar
+{
     /// <summary>
     /// Main object for network
     /// </summary>

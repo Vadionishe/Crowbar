@@ -71,7 +71,8 @@ namespace Crowbar.Enemy
 
         private void DestroySnake()
         {
-            NetworkServer.Destroy(gameObject);
+            if (!isDied)
+                NetworkServer.Destroy(gameObject);
         }
 
         private void Awake()

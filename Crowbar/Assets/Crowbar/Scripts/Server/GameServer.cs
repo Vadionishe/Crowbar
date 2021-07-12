@@ -1,9 +1,9 @@
-﻿namespace Crowbar.Server
-{
-    using System;
-    using UnityEngine;
-    using Mirror;
+﻿using System;
+using UnityEngine;
+using Mirror;
 
+namespace Crowbar.Server
+{
     /// <summary>
     /// Server room logic for client connections
     /// </summary>
@@ -11,8 +11,13 @@
     {
         #region Variables
         public static GameServer instance;
-        string[] args;
-        public GameObject loadScreen;
+
+        public float physicTime = 0.04f;
+        public bool destroyObject;
+        public GameObject[] destroedGameObjectInServer;
+        public Component[] destroedComponentInServer;       
+
+        private string[] args;
         #endregion
 
         #region Functions
@@ -22,8 +27,8 @@
         private void Start()
         {
             instance = this;
-
             args = Environment.GetCommandLineArgs();
+            Time.fixedDeltaTime = physicTime;
 
             try
             {
@@ -38,6 +43,17 @@
             catch (Exception e)
             {
                 Debug.LogError(e);
+            }
+
+            if (destroyObject)
+            {
+                foreach (GameObject destroyObject in destroedGameObjectInServer)
+                    if (destroyObject != null)
+                        Destroy(destroyObject);
+
+                foreach (Component destroyComponent in destroedComponentInServer)
+                    if (destroyComponent != null)
+                        Destroy(destroyComponent);
             }
 
             InvokeRepeating(nameof(CheckToQuit), 20f, 20f);
@@ -71,8 +87,6 @@
 
                 NetworkManager.singleton.StartServer();
             }
-
-            loadScreen.SetActive(!NetworkServer.active);
         }
         #endregion
     }

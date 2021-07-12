@@ -199,7 +199,7 @@ namespace Crowbar.Ship
             if (isServer)
             {
                 if (m_playerInput != null)
-                    pumpHeight = Mathf.Clamp(pumpHeight + m_playerInput.vertical, 0, maxPumpHeight);
+                    pumpHeight = Mathf.Clamp(pumpHeight + m_playerInput.vertical * speedPumpMove, 0, maxPumpHeight);
 
                 if (pumpHeight >= maxPumpHeight)
                     canWaterPumped = true;

@@ -1,13 +1,14 @@
-﻿namespace Crowbar
-{
-    using System.Collections;
-    using UnityEngine;
+﻿using System.Collections;
+using UnityEngine;
+using Mirror;
 
+namespace Crowbar
+{
     /// <summary>
     /// Component for move camera for character
     /// </summary>
     [AddComponentMenu("Components character/Components player/Camera component")]
-    public class CameraComponent : MonoBehaviour, ICharacterComponent
+    public class CameraComponent : NetworkBehaviour, ICharacterComponent
     {
         #region Variables
         [Header("Camera settings")]
@@ -28,6 +29,7 @@
         #endregion
 
         #region Functions
+        [Client]
         public void Shake(float duration, float magnitude)
         {
             StopAllCoroutines();
@@ -37,6 +39,7 @@
         /// <summary>
         /// Set camera default look size
         /// </summary>
+        [Client]
         public void SetDefaultLookSize(float smooth = 0.1f)
         {
             smoothMove = smooth;
@@ -47,6 +50,7 @@
         /// Set camera look size
         /// </summary>
         /// <param name="size">Look size</param>
+        [Client]
         public void SetLookSize(float size, float smooth = 0.1f)
         {
             smoothMove = smooth;
@@ -57,6 +61,7 @@
         /// Set state component
         /// </summary>
         /// <param name="isActive">State component</param>
+        [Client]
         public void SetComponentActive(bool isActive)
         {
             enabled = isActive;
@@ -73,6 +78,7 @@
         /// <summary>
         /// Initialization this component
         /// </summary>
+        [Client]
         public virtual void Initialize()
         {
             if (target == null)
@@ -87,6 +93,7 @@
         /// <summary>
         /// Moving camera
         /// </summary>
+        [Client]
         public virtual void MoveToTarget()
         {
             if (cam != null && target != null)
@@ -99,6 +106,7 @@
             }
         }
 
+        [Client]
         private IEnumerator Shaking(float duration, float magnitude)
         {
             Vector3 originalPos = cam.transform.localPosition;
@@ -121,12 +129,14 @@
 
         private void Awake()
         {
-            Initialize();
+            if (!isServer)
+                Initialize();
         }
 
         private void Update()
         {
-            MoveToTarget();
+            if (!isServer)
+                MoveToTarget();
         }   
         #endregion
     }
