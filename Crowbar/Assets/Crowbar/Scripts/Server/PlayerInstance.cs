@@ -10,29 +10,139 @@ namespace Crowbar.Server
     /// </summary>
     public class PlayerInstance : NetworkBehaviour
     {
-        private UIController uIController;
+        public string nameCrow;
+
+        public int currentRoom;
+        public bool isReady;
+
+        private UIController uiController;
+        private ClientMenu clientMenu;
+        private RoomManager roomManager;
+        private ChatRoom chatRoom;
 
         #region Functions
         public override void OnStopClient()
         {
+            //DONT WORK!
+
             base.OnStopClient();
 
             if (isLocalPlayer)
-                uIController.SetMessageScreen("Connection lost! Please, restart game.");
+                uiController.SetMessageScreen("Connection lost! Please, restart game.");
+        }
+
+        public void SendMessageToRoom(string message)
+        {
+            CmdSendMessage(message);
+        }
+
+        public void GoToRoom(int id)
+        {
+            CmdGoToRoom(id);
+        }
+
+        public void LeaveRoom()
+        {
+            CmdLeaveRoom(currentRoom);
+        }
+
+        public void CreateRoom()
+        {
+            CmdCreateRoom();
+        }
+
+        [Command]
+        public void CmdSendMessage(string message)
+        {
+            MainServer.SendMessage(this, message);
+        }
+
+        [Command]
+        public void CmdCreateRoom()
+        {
+            MainServer.CreateRoom(this, nameCrow, string.Empty);
+        }
+
+        [Command]
+        public void CmdGoToRoom(int id)
+        {
+            MainServer.EnterRoom(this, id);
+        }
+
+        [Command]
+        public void CmdLeaveRoom(int id)
+        {
+            MainServer.RemoveFromRoom(this, id);
+        }
+
+        [TargetRpc]
+        public void TargetSendMessage(NetworkConnection connection, string message)
+        {
+            chatRoom.ReceiveMessage(message);
+        }
+
+        [TargetRpc]
+        public void TargetSetTextPlayers(NetworkConnection connection, string textPlayers)
+        {
+            roomManager.UpdatePlayerRoom(textPlayers);
+        }
+
+        [TargetRpc]
+        public void TargetGoRoom(NetworkConnection connection, int id, string message)
+        {
+            uiController.SetWaitScreen(false);
+
+            if (string.IsNullOrEmpty(message))
+            {
+                currentRoom = id;
+
+                uiController.SetDeactivateWindow(uiController.rooms);
+                uiController.SetActivateWindow(uiController.room);
+            }
+            else
+            {
+                uiController.SetMessageScreen(message);
+            }
+        }
+
+        [TargetRpc]
+        public void TargetLeaveRoom(NetworkConnection connection)
+        {
+            uiController.SetWaitScreen(false);
+            uiController.SetDeactivateWindow(uiController.room);
+            uiController.SetActivateWindow(uiController.rooms);
+        }
+
+        [TargetRpc]
+        public void TargetSpawnRoom(NetworkConnection connection, int id, string info)
+        {
+            roomManager.SpawnRoom(id, info);
+        }
+
+        [TargetRpc]
+        public void TargetUpdateRoom(NetworkConnection connection, int id, string info)
+        {
+            roomManager.UpdateRoom(id, info);
+        }
+
+        [TargetRpc]
+        public void TargetRemoveRoom(NetworkConnection connection, int id)
+        {
+            roomManager.RemoveRoom(id);
         }
 
         public void GetRecords(int countRecords)
         {
             CmdGetRecords(countRecords);
 
-            uIController.SetWaitScreen(true);
+            uiController.SetWaitScreen(true);
         }
 
         public void BuyHat(int id, string name, int price)
         {
             CmdBuyHat(id, name, price);
 
-            uIController.SetWaitScreen(true);
+            uiController.SetWaitScreen(true);
         }
 
         [Client]
@@ -85,10 +195,10 @@ namespace Crowbar.Server
         [TargetRpc]
         public void TargetBuyHat(NetworkConnection connection, bool isAccess, int id, string message)
         {
-            uIController.SetWaitScreen(false);
+            uiController.SetWaitScreen(false);
 
             if (!string.IsNullOrEmpty(message))
-                uIController.SetMessageScreen(message);
+                uiController.SetMessageScreen(message);
 
             if (isAccess)
             {
@@ -99,7 +209,7 @@ namespace Crowbar.Server
                     Account.Gold -= skinHat.price;
 
                     skinHat.SetBuy();
-                    FindObjectOfType<ClientMenu>().SetInfoAccount();
+                    clientMenu.SetInfoAccount();
                 }
             }              
         }
@@ -117,7 +227,7 @@ namespace Crowbar.Server
         {
             FindObjectOfType<RecordManager>().SetRecords(records);
 
-            uIController.SetWaitScreen(false);
+            uiController.SetWaitScreen(false);
         }
 
         [TargetRpc]
@@ -129,10 +239,10 @@ namespace Crowbar.Server
             {
                 Account.MapAccount(data);
 
-                uIController.SetActivateWindow(uIController.mainMenu);
-                uIController.SetDeactivateWindow(uIController.authenticationWindow);
+                uiController.SetActivateWindow(uiController.mainMenu);
+                uiController.SetDeactivateWindow(uiController.authenticationWindow);
 
-                FindObjectOfType<ClientMenu>().SetInfoAccount();
+                clientMenu.SetInfoAccount();
                 FindObjectOfType<ManagerAchivments>().SetActiveAchivments(Account.idAchivments);
                 FindObjectOfType<SkinShop>().LoadHats(Account.idHats, Account.idCurrentHat);
             }
@@ -140,10 +250,10 @@ namespace Crowbar.Server
             {
                 Account.Reset();
 
-                uIController.SetMessageScreen(message);
+                uiController.SetMessageScreen(message);
             }
 
-            uIController.SetWaitScreen(false);
+            uiController.SetWaitScreen(false);
         }
 
         [TargetRpc]
@@ -155,30 +265,30 @@ namespace Crowbar.Server
             {
                 Account.MapAccount(data);
 
-                uIController.SetActivateWindow(uIController.mainMenu);
-                uIController.SetDeactivateWindow(uIController.registrationWindow);
+                uiController.SetActivateWindow(uiController.mainMenu);
+                uiController.SetDeactivateWindow(uiController.registrationWindow);
 
-                FindObjectOfType<ClientMenu>().SetInfoAccount();
+                clientMenu.SetInfoAccount();
             }
             else
             {
                 Account.Reset();
 
-                uIController.SetMessageScreen(message);
+                uiController.SetMessageScreen(message);
             }
 
-            uIController.SetWaitScreen(false);
+            uiController.SetWaitScreen(false);
         }
 
         public void Authentication(string login, string password)
         {
-            uIController.SetWaitScreen(true);
+            uiController.SetWaitScreen(true);
             CmdAuthentication(login, password, Application.version);
         }
 
         public void Registration(string login, string password, string name)
         {
-            uIController.SetWaitScreen(true);
+            uiController.SetWaitScreen(true);
             CmdRegistration(login, password, name);
         }
 
@@ -191,14 +301,14 @@ namespace Crowbar.Server
 
                 if (password == _password)
                 {
-                    string name = SQLiteDB.ExecuteRequestWithAnswer($"SELECT CharacterName FROM Accounts WHERE Login = '{login}';");
+                    nameCrow = SQLiteDB.ExecuteRequestWithAnswer($"SELECT CharacterName FROM Accounts WHERE Login = '{login}';");
                     string gold = SQLiteDB.ExecuteRequestWithAnswer($"SELECT Gold FROM Accounts WHERE Login = '{login}';");
                     string currentHat = SQLiteDB.ExecuteRequestWithAnswer($"SELECT Skin FROM Accounts WHERE Login = '{login}';");
                     string achivments = SQLiteDB.ExecuteRequestWithAnswer($"SELECT AchivmentsId FROM Accounts WHERE Login = '{login}';");
                     string hats = SQLiteDB.ExecuteRequestWithAnswer($"SELECT SkinsId FROM Accounts WHERE Login = '{login}';");
 
-                    TargerCallbackAuthentication(netIdentity.connectionToClient, $"true:{login}:{password}:{name}:{gold}:{achivments}:{currentHat}:{hats}", "Access!");
-                    Debug.Log($"[{name}] login!");
+                    TargerCallbackAuthentication(netIdentity.connectionToClient, $"true:{login}:{password}:{nameCrow}:{gold}:{achivments}:{currentHat}:{hats}", "Access!");
+                    Debug.Log($"[{nameCrow}] login!");
                 }
                 else
                 {
@@ -251,30 +361,20 @@ namespace Crowbar.Server
         }
 
         [Command]
-        public void CmdReady(bool isReady)
+        public void CmdReady(int idRoom, bool isReady)
         {
-            if (isReady)
-            {
-                MainServer.ReadyHandler?.Invoke(this);
-            }
-            else
-            {
-                MainServer.DontReadyHandler?.Invoke(this);
-            }
+            MainServer.PlayerReady(this, idRoom, isReady);
         }
 
         [TargetRpc]
         public void TargetSetTextPlayersFound(NetworkConnection connection, string textPlayersFound)
         {
-            uIController.SetFoundPlayersText(textPlayersFound);
+            uiController.SetFoundPlayersText(textPlayersFound);
         }
 
         public void SetReady(bool isReady)
         {
-            CmdReady(isReady);
-
-            if (!isReady)
-                uIController.SetFoundPlayersText(string.Empty);
+            CmdReady(currentRoom, isReady);
         }
 
         public void ForceGameStart(string port)
@@ -298,6 +398,14 @@ namespace Crowbar.Server
             SceneManager.LoadScene("Game");
         }
 
+        private void Awake()
+        {
+            uiController = FindObjectOfType<UIController>();
+            clientMenu = FindObjectOfType<ClientMenu>();
+            roomManager = FindObjectOfType<RoomManager>();
+            chatRoom = FindObjectOfType<ChatRoom>();
+        }
+
         /// <summary>
         /// At startup, we immediately connect to the main server
         /// </summary>
@@ -309,7 +417,6 @@ namespace Crowbar.Server
             }
             else if (isLocalPlayer)
             {
-                uIController = FindObjectOfType<UIController>();
                 ClientMenu.localPlayerInstance = this;
 
                 if (Account.IsAuthentication)

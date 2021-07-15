@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using Mirror;
 using UnityEngine.Events;
+using Crowbar.Item;
 
 namespace Crowbar
 {
@@ -31,6 +32,11 @@ namespace Crowbar
         public JumpComponent jumpComponent;
         public UsingComponent usingComponent;
         public Character character;
+
+        public ParticleSystem particleBlood;
+        public AudioSource audioSource;
+        public AudioClip damageSound;
+        public AudioClip needOxygenSound;
 
         public class DiedEvent : UnityEvent<bool> { }
         public DiedEvent onDied;
@@ -80,6 +86,9 @@ namespace Crowbar
         public void ChangeOxygen(float value)
         {
             oxygen = Mathf.Clamp(oxygen + value, 0, maxOxygen);
+
+            if (oxygen < 20f && !isDied)
+                RpcNeedOxygen();
 
             TargetSetOxygen(netIdentity.connectionToClient, oxygen);
         }
@@ -131,6 +140,21 @@ namespace Crowbar
             health = value;
         }
 
+        [ClientRpc]
+        public void RpcDamage()
+        {
+            audioSource.volume = Settings.volume;
+            audioSource.PlayOneShot(damageSound);
+            particleBlood.Play();
+        }
+
+        [ClientRpc]
+        public void RpcNeedOxygen()
+        {
+            audioSource.volume = Settings.volume;
+            audioSource.PlayOneShot(needOxygenSound);
+        }
+
         [Server]
         private void ChangeStats()
         {
@@ -148,6 +172,38 @@ namespace Crowbar
 
             if (isServer)
                 InvokeRepeating(nameof(ChangeStats), timeChangeStats, timeChangeStats);
+        }
+
+        private void OnTriggerEnter2D(Collider2D collision)
+        {
+            if (isServer) 
+            {
+                Hammer hammer = collision.GetComponent<Hammer>();
+                ShipBullet bullet = collision.GetComponent<ShipBullet>();
+
+                if (hammer != null && hammer.handedCharacter != null)
+                {
+                    if (hammer.handedCharacter != netIdentity && hammer.isAttacking && !hammer.onCooldown)
+                    {
+                        if (!isDied)
+                        {
+                            ChangeHealth(-4f);
+                            RpcDamage();
+                            hammer.SetCooldown();
+                        }
+                    }
+                }
+
+                if (bullet != null)
+                {
+                    if (!isDied && transform.parent == null)
+                    {
+                        ChangeHealth(-1000);
+                        RpcDamage();
+                        NetworkServer.Destroy(bullet.gameObject);
+                    }
+                }
+            }
         }
     }
 }

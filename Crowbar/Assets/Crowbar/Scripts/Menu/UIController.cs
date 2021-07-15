@@ -14,6 +14,8 @@ namespace Crowbar
         public GameObject settingScreen;
         public GameObject recordsScreen;
         public GameObject achivmentScreen;
+        public GameObject rooms;
+        public GameObject room;
 
         public Text textMessage;
         public Text textFoundPlayers;

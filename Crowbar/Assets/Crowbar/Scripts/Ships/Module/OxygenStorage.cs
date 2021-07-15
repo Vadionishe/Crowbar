@@ -18,14 +18,16 @@ namespace Crowbar.Ship
 
         public void Pick()
         {
-            if (GetComponent<SpriteRenderer>() != null)
-                GetComponent<SpriteRenderer>().color = PickColor;
+            if (gameObject != null)
+                if (GetComponent<SpriteRenderer>() != null)
+                    GetComponent<SpriteRenderer>().color = PickColor;
         }
 
         public void UnPick()
         {
-            if (GetComponent<SpriteRenderer>() != null)
-                GetComponent<SpriteRenderer>().color = m_colorMain;
+            if (gameObject != null)
+                if (GetComponent<SpriteRenderer>() != null)
+                    GetComponent<SpriteRenderer>().color = m_colorMain;
         }
 
         [Server]

@@ -71,7 +71,7 @@ namespace Crowbar
 
         private void Unpick()
         {
-            if (pickInfo != null)
+            if (pickObject != null)
                 pickInfo.UnPick();
 
             if (pickObject != null)

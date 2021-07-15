@@ -134,19 +134,29 @@ namespace Crowbar.Item
             }
         }
 
+        private void Update()
+        {
+            if (isServer && isDied)
+                Fall();
+        }
+
         private void OnTriggerEnter2D(Collider2D collision)
         {
             if (isServer)
             {
                 Hammer hammer = collision.GetComponent<Hammer>();
+                ShipBullet bullet = collision.GetComponent<ShipBullet>();
                 Water water = collision.GetComponent<Water>();
                 UnderwaterShip ship = collision.GetComponent<UnderwaterShip>();
 
                 if (ship != null)
                     SetAngle(transform.eulerAngles.z + 180);
 
-                if (hammer != null)
-                    if (!hammer.onCooldown && hammer.isAttacking && !isDied)
+                if (bullet != null && !isDied)
+                    Death();
+
+                 if (hammer != null && !isDied)
+                    if (!hammer.onCooldown && hammer.isAttacking)
                         Death();
 
                 if (water != null)

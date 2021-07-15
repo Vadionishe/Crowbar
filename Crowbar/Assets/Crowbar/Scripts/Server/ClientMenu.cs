@@ -18,6 +18,8 @@ namespace Crowbar.Server
         public InputField logAuth;
         public InputField passAuth;
 
+        public InputField passRoom;
+
         public InputField portForce;
 
         public int minLoginLenght = 3;
@@ -32,6 +34,18 @@ namespace Crowbar.Server
         public void SetInfoAccount()
         {
             textDebug.text = $"Name: {Account.Name}\nGold: {Account.Gold}";
+        }
+
+        public void CreateRoom()
+        {
+            if (localPlayerInstance != null && Account.IsAuthentication)
+                localPlayerInstance.CreateRoom();
+        }
+
+        public void LeaveRoom()
+        {
+            if (localPlayerInstance != null && Account.IsAuthentication)
+                localPlayerInstance.LeaveRoom();
         }
 
         public void SetReady(bool isReady)
@@ -143,6 +157,13 @@ namespace Crowbar.Server
             }
 
             Invoke(nameof(CheckFailConnect), 4f);
+        }
+
+        private void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.Return))
+                if (FindObjectOfType<UIController>().authenticationWindow.activeSelf)
+                    Authentication();
         }
         #endregion
     }

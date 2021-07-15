@@ -6,6 +6,11 @@ namespace Crowbar.Item
 {
     public abstract class ItemObject : WorldObject, IUse, IPickInfo
     {
+        public bool isFall = true;
+        public bool dropFixedAngle = true;
+        public float speedDown;
+        public float offsetLanded;
+
         public int damage;
         public float cooldownAttack;
         public float handedAngle;
@@ -77,16 +82,18 @@ namespace Crowbar.Item
         {
             Character character = usingCharacter.GetComponent<Character>();
             PlayerInputForServer playerInput = usingCharacter.GetComponent<PlayerInputForServer>();
-
+            
             canParenting = true;
             syncPosition.trueUpdate = true;
             transform.parent = character.transform.parent;
             character.hand.itemObject = null;
             handedCharacter = null;
             colliderItem.isTrigger = false;
-            GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Dynamic;
+            isFall = true;
             playerInput.onPushE.RemoveListener(UseItem);
-            rigidbodyItem.AddForce(direction.normalized * force);
+
+            if (dropFixedAngle)
+                transform.eulerAngles = Vector2.zero;
 
             RpcDropItem(usingCharacter);
         }
@@ -104,7 +111,6 @@ namespace Crowbar.Item
                 character.hand.itemObject = this;
                 handedCharacter = usingCharacter;
                 colliderItem.isTrigger = true;
-                GetComponent<Rigidbody2D>().bodyType = RigidbodyType2D.Kinematic;
                 StartCoroutine(WaitToListenUse());
 
                 if (handedForceAngle)
@@ -145,6 +151,43 @@ namespace Crowbar.Item
                 NetworkServer.Destroy(gameObject);
         }
 
+        public virtual void CheckToDestroy()
+        {
+            Collider2D[] players = Physics2D.OverlapCircleAll(transform.position, 600f, LayerMask.GetMask("Player"));
+
+            if (players.Length == 0)
+                NetworkServer.Destroy(gameObject);
+        }
+
+        public virtual void Fall()
+        {
+            if (handedCharacter == null)
+            {
+                if (isFall)
+                {
+                    RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, 2f, LayerMask.GetMask("GroundCollision"));
+
+                    if (hit.collider != null)
+                    {                       
+                        transform.position = hit.point + Vector2.up * offsetLanded;
+
+                        isFall = false;
+                    }
+                    else
+                    {
+                        transform.position += Vector3.down * speedDown * Time.deltaTime;
+                    }
+                }
+                else
+                {
+                    RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, 1f, LayerMask.GetMask("GroundCollision"));
+
+                    if (hit.collider == null)
+                        isFall = true;
+                }
+            }
+        }
+
         public virtual void CheckToSleep()
         {
             if (rigidbodyItem.velocity.y < 1f && !rigidbodyItem.isKinematic)
@@ -159,17 +202,9 @@ namespace Crowbar.Item
             }
         }
 
-        public void Attack()
+        public void SetCooldown()
         {
             StartCoroutine(Cooldown());
-        }
-
-        protected virtual void CheckToDestroy()
-        {
-            Collider2D[] players = Physics2D.OverlapCircleAll(transform.position, 600f, LayerMask.GetMask("Player"));
-
-            if (players.Length == 0)
-                NetworkServer.Destroy(gameObject);
         }
 
         private IEnumerator Cooldown()

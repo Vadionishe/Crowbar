@@ -14,7 +14,8 @@ namespace Crowbar.Ship
         public float waterUp;
         public float[] scaleStates;
         public Water waterPlace;
-        public ParticleSystem particle;
+        public ParticleSystem particleWater;
+        public ParticleSystem particleRepair;
 
         public bool isCollideWaterShip;
         public bool isCollideWaterGlobal;
@@ -36,6 +37,7 @@ namespace Crowbar.Ship
         {
             SetState(state);
 
+            particleRepair.Play();
             audioSource.PlayOneShot(repaireSound);
         }
 
@@ -75,26 +77,26 @@ namespace Crowbar.Ship
             {
                 if (isCollideWaterShip)
                 {
-                    if (!particle.isStopped)
+                    if (!particleWater.isStopped)
                     {
-                        particle.Stop();
+                        particleWater.Stop();
                         audioSource.Stop();
                     }
                 }
                 else
                 {
-                    if (particle.isStopped)
+                    if (particleWater.isStopped)
                     {
-                        particle.Play();
+                        particleWater.Play();
                         audioSource.Play();
                     }
                 }
             }
             else
             {
-                if (!particle.isStopped)
+                if (!particleWater.isStopped)
                 {
-                    particle.Stop();
+                    particleWater.Stop();
                     audioSource.Stop();
                 }
             }
@@ -109,7 +111,7 @@ namespace Crowbar.Ship
             {
                 if (!hammer.onCooldown && hand.isAttack && hammer.handedCharacter == GameUI.localStats.netIdentity)
                 {
-                    hammer.Attack();
+                    hammer.SetCooldown();
                     CmdRepairOne();
                 }
             }
@@ -125,7 +127,7 @@ namespace Crowbar.Ship
                     audioSource.volume = Settings.volume;
 
                     audioSource.PlayOneShot(crashSound);
-                    particle.Play();
+                    particleWater.Play();
                 }
                 catch (Exception e)
                 {

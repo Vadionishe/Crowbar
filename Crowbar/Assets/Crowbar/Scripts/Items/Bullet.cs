@@ -17,5 +17,11 @@ namespace Crowbar.Item
                 colliderItem.isTrigger = true;
             }
         }
+
+        private void Update()
+        {
+            if (isServer)
+                Fall();
+        }
     }
 }
