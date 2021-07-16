@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Crowbar.System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -24,6 +25,7 @@ namespace Crowbar.Server
             if (historyMessage.Count > historyMessageCount)
                 historyMessage.RemoveAt(0);
 
+            FlashWindow.Flash();
             ShowMessages();
         }
 

@@ -1,11 +1,11 @@
-﻿namespace Crowbar
-{
-    using System;
-    using UnityEngine;
-    using Mirror;
-    using Crowbar.Item;
-    using Crowbar.Server;
+﻿using System;
+using UnityEngine;
+using Mirror;
+using Crowbar.Item;
+using Crowbar.Server;
 
+namespace Crowbar
+{
     /// <summary>
     /// Main component for player representation
     /// </summary>

@@ -1,8 +1,9 @@
-﻿namespace Crowbar
-{
-    using UnityEngine;
-    using UnityEngine.Events;
+﻿using UnityEngine;
+using UnityEngine.Events;
+using System;
 
+namespace Crowbar 
+{ 
     /// <summary>
     /// Move controller for player character
     /// </summary>
@@ -136,7 +137,7 @@
         {
             if (canMove)
             {
-                animator.SetFloat("speedRun", System.Math.Sign(character.avatar.transform.localScale.x) == System.Math.Sign(m_xMove) ? 1f : -1f);
+                animator.SetFloat("speedRun", Math.Sign(character.avatar.transform.localScale.x) == Math.Sign(m_xMove) ? 1f : -1f);
                 animator.SetBool("inWater", waterChecker.CheckCollision());
                 animator.SetBool("isRun", m_xMove != 0);
 

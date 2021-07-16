@@ -2,6 +2,7 @@
 using Mirror;
 using UnityEngine.Events;
 using Crowbar.Item;
+using Crowbar.System;
 
 namespace Crowbar
 {
@@ -119,6 +120,8 @@ namespace Crowbar
             moveComponent.SetVelocityForced(0, 0);
             moveComponent.animator.SetBool("isDeath", died);
 
+            FlashWindow.Flash();
+
             onDied.Invoke(died);
         }
 
@@ -137,6 +140,9 @@ namespace Crowbar
         [TargetRpc]
         public void TargetSetHealth(NetworkConnection connection, float value)
         {
+            if (value < health)
+                FlashWindow.Flash(1);
+
             health = value;
         }
 
@@ -146,6 +152,8 @@ namespace Crowbar
             audioSource.volume = Settings.volume;
             audioSource.PlayOneShot(damageSound);
             particleBlood.Play();
+
+            FlashWindow.Flash(1);
         }
 
         [ClientRpc]
@@ -153,6 +161,8 @@ namespace Crowbar
         {
             audioSource.volume = Settings.volume;
             audioSource.PlayOneShot(needOxygenSound);
+
+            FlashWindow.Flash(1);
         }
 
         [Server]

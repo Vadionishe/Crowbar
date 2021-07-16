@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using Mirror;
+using Crowbar.System;
 
 namespace Crowbar.Server
 {
@@ -143,6 +144,8 @@ namespace Crowbar.Server
         /// </summary>
         private void Start()
         {
+            FlashWindow.Flash();
+
             UIController uIController = FindObjectOfType<UIController>();
 
             NetworkManager.singleton.StartClient();

@@ -1,9 +1,9 @@
-﻿namespace Crowbar
-{
-    using UnityEngine;
-    using Mirror;
-    using System.Collections.Generic;
+﻿using UnityEngine;
+using Mirror;
+using System.Collections.Generic;
 
+namespace Crowbar
+{
     public class ShipBullet : WorldObject
     {
         public float damage = 1f;

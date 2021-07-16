@@ -1,10 +1,10 @@
-﻿namespace Crowbar
-{
-    using UnityEngine;
-    using Mirror;
-    using Crowbar.Item;
-    using System.Collections;
+﻿using UnityEngine;
+using Mirror;
+using Crowbar.Item;
+using System.Collections;
 
+namespace Crowbar
+{
     /// <summary>
     /// Using controller for player character
     /// </summary>

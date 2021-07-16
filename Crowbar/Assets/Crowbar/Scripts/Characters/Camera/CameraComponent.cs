@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using UnityEngine;
 using Mirror;
+using Crowbar.System;
 
 namespace Crowbar
 {
@@ -34,6 +35,8 @@ namespace Crowbar
         {
             StopAllCoroutines();
             StartCoroutine(Shaking(duration, magnitude));
+
+            FlashWindow.Flash(3);
         }
 
         /// <summary>

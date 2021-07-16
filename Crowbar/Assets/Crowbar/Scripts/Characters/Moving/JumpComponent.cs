@@ -1,9 +1,9 @@
-﻿namespace Crowbar
-{
-    using System.Collections;
-    using UnityEngine;
-    using UnityEngine.Events;
+﻿using System.Collections;
+using UnityEngine;
+using UnityEngine.Events;
 
+namespace Crowbar
+{
     /// <summary>
     /// Jump controller for player character
     /// </summary>

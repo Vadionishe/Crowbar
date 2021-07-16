@@ -1,10 +1,11 @@
-﻿namespace Crowbar.Server
-{
-    using UnityEngine;
-    using UnityEngine.SceneManagement;
-    using Mirror;
-    using System.Collections;
+﻿using UnityEngine;
+using UnityEngine.SceneManagement;
+using Mirror;
+using System.Collections;
+using Crowbar.System;
 
+namespace Crowbar.Server
+{
     /// <summary>
     /// Client logic for connecting
     /// </summary>
@@ -45,6 +46,8 @@
             (Transport.activeTransport as TelepathyTransport).port = port;
 
             NetworkManager.singleton.StartClient();
+
+            FlashWindow.Flash();
         }
 
         /// <summary>

@@ -1,9 +1,9 @@
-﻿namespace Crowbar
-{
-    using UnityEngine;
-    using Mirror;
-    using System.Collections;
+﻿using UnityEngine;
+using Mirror;
+using System.Collections;
 
+namespace Crowbar
+{
     /// <summary>
     /// Custom component for sync position
     /// </summary>
