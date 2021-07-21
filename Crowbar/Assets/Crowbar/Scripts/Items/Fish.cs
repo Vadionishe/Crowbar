@@ -70,7 +70,7 @@ namespace Crowbar.Item
                 base.CheckToSleep();
         }
 
-        [Server]
+        [ServerCallback]
         public void SetAngle()
         {
             if (!isDied)
@@ -80,7 +80,7 @@ namespace Crowbar.Item
             }
         }
 
-        [Server]
+        [ServerCallback]
         public void SetAngle(float angle)
         {
             if (!isDied)

@@ -121,18 +121,15 @@ namespace Crowbar.Ship
         {
             if (!isServer)
             {
-                try
-                {
-                    waterPlace = GetComponentInParent<UnderwaterShip>().water;
-                    audioSource.volume = Settings.volume;
+                UnderwaterShip ship = GetComponentInParent<UnderwaterShip>();
 
-                    audioSource.PlayOneShot(crashSound);
-                    particleWater.Play();
-                }
-                catch (Exception e)
-                {
-                    Debug.LogError(e);
-                }
+                if (ship != null)
+                    waterPlace = ship.water;
+
+                audioSource.volume = Settings.volume;
+
+                audioSource.PlayOneShot(crashSound);
+                particleWater.Play();
             }
         }
 

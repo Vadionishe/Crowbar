@@ -19,7 +19,7 @@ namespace Crowbar.Server
             counter++;
 
             Id = counter;
-            MaxPlayer = 6;
+            MaxPlayer = 10;
             MinPlayer = 2;
             Name = name;
             Password = password;

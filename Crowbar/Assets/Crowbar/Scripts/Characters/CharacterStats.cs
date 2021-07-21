@@ -128,6 +128,9 @@ namespace Crowbar
         [TargetRpc]
         public void TargetSetFood(NetworkConnection connection, float value)
         {
+            if (value < 2f && isLocalPlayer)
+                FlashWindow.Flash(1);
+
             food = value;
         }
 
@@ -140,7 +143,7 @@ namespace Crowbar
         [TargetRpc]
         public void TargetSetHealth(NetworkConnection connection, float value)
         {
-            if (value < health)
+            if (value < health && isLocalPlayer)
                 FlashWindow.Flash(1);
 
             health = value;
@@ -153,7 +156,8 @@ namespace Crowbar
             audioSource.PlayOneShot(damageSound);
             particleBlood.Play();
 
-            FlashWindow.Flash(1);
+            if (isLocalPlayer)
+                FlashWindow.Flash(1);
         }
 
         [ClientRpc]
@@ -162,7 +166,8 @@ namespace Crowbar
             audioSource.volume = Settings.volume;
             audioSource.PlayOneShot(needOxygenSound);
 
-            FlashWindow.Flash(1);
+            if (isLocalPlayer)
+                FlashWindow.Flash(1);
         }
 
         [Server]

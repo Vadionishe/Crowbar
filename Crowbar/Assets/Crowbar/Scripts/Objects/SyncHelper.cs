@@ -11,7 +11,10 @@ namespace Crowbar
         {
             if (syncObject != null)
             {
-                syncObject.transform.SetParent((parent != null) ? parent.transform : null);
+                if (parent != null && parent.isActiveAndEnabled)
+                    syncObject.transform.SetParent(parent.transform);
+                else
+                    syncObject.transform.SetParent(null);
             }
         }
 

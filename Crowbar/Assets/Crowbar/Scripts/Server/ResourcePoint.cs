@@ -20,7 +20,31 @@ namespace Crowbar
 
         public Resources[] resources;
 
+        public float xRandom;
+        public float yRandom;
         public bool isSpawned;
+
+        [ContextMenu("Spawn")]
+        public void Spawn()
+        {
+            foreach (Resources resources in resources)
+            {
+                float chance = Random.Range(0, 1f);
+                int count = Random.Range(resources.minCount, resources.maxCount + 1);
+
+                if (chance < resources.chance)
+                {
+                    for (int i = 0; i < count; i++)
+                    {
+                        Vector3 spawnPosition = transform.position + new Vector3(Random.Range(-xRandom, xRandom), Random.Range(-yRandom, yRandom), 0);
+                        GameObject resource = Instantiate(resources.prefab, spawnPosition, Quaternion.identity, null);
+
+                        NetworkServer.Spawn(resource);
+                        resource.GetComponent<ItemObject>().Initialize();
+                    }
+                }
+            }
+        }
 
         private void CheckToSpawn()
         {
@@ -33,22 +57,7 @@ namespace Crowbar
             {
                 isSpawned = true;
 
-                foreach (Resources resources in resources)
-                {
-                    float chance = Random.Range(0, 1f);
-                    int count = Random.Range(resources.minCount, resources.maxCount + 1);
-
-                    if (chance < resources.chance)
-                    {
-                        for (int i = 0; i < count; i++)
-                        {
-                            GameObject resource = Instantiate(resources.prefab, transform.position, Quaternion.identity, null);
-
-                            NetworkServer.Spawn(resource);
-                            resource.GetComponent<ItemObject>().Initialize();
-                        }
-                    }
-                }    
+                Spawn();
             }
         }
 

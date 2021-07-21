@@ -64,7 +64,7 @@ namespace Crowbar
         /// Set state component
         /// </summary>
         /// <param name="isActive">State component</param>
-        [Client]
+        [ClientCallback]
         public void SetComponentActive(bool isActive)
         {
             enabled = isActive;
@@ -81,7 +81,7 @@ namespace Crowbar
         /// <summary>
         /// Initialization this component
         /// </summary>
-        [Client]
+        [ClientCallback]
         public virtual void Initialize()
         {
             if (target == null)
