@@ -2,6 +2,7 @@
 using UnityEngine.Events;
 using Mirror;
 using Crowbar.Ship;
+using Crowbar.Item;
 
 namespace Crowbar
 {
@@ -42,12 +43,29 @@ namespace Crowbar
 
         private void OnTriggerStay2D(Collider2D collision)
         {
-            OnParenting(collision.gameObject, ActionTrigger.Enter);
+            WorldObject worldObject = collision.transform.GetComponent<WorldObject>();
+
+            if (worldObject != null && worldObject.canParenting)
+                OnParenting(collision.gameObject, ActionTrigger.Enter);
         }
 
         private void OnTriggerExit2D(Collider2D collision)
         {
-            OnParenting(collision.gameObject, ActionTrigger.Exit);
+            WorldObject worldObject = collision.transform.GetComponent<WorldObject>();
+            ItemObject itemObject = collision.transform.GetComponent<ItemObject>();
+
+            if (worldObject != null && worldObject.canParenting)
+            {
+                if (itemObject != null)
+                {
+                    if (itemObject.rigidbodyItem.simulated)
+                        OnParenting(collision.gameObject, ActionTrigger.Exit);
+                }
+                else
+                {
+                    OnParenting(collision.gameObject, ActionTrigger.Exit);
+                }
+            }              
         }
 
         private void OnParenting(GameObject syncObject, ActionTrigger actionTrigger)
@@ -66,7 +84,7 @@ namespace Crowbar
 
                 if (isServer)
                 {
-                    if (syncPosition.isServerObject && worldObject.canParenting)
+                    if (syncPosition.isServerObject)
                     {
                         SyncHelper.SetParent(worldObject.gameObject, parentIdentity);
                     }
@@ -93,7 +111,7 @@ namespace Crowbar
             if (syncObject.transform.parent == transform && actionTrigger == ActionTrigger.Enter)
                 return false;
 
-            if ((worldObject != null && !worldObject.canParenting) || worldObject == null)
+            if (worldObject == null)
                 return false;
 
             if (actionTrigger == ActionTrigger.Enter)

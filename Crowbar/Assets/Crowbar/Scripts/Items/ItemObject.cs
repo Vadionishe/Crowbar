@@ -10,6 +10,7 @@ namespace Crowbar.Item
         public bool dropFixedAngle = true;
         public float speedDown;
         public float offsetLanded;
+        public float distanceToGrounded = 1f;
 
         public int damage;
         public float cooldownAttack;
@@ -151,6 +152,7 @@ namespace Crowbar.Item
                 NetworkServer.Destroy(gameObject);
         }
 
+        [Server]
         public virtual void CheckToDestroy()
         {
             Collider2D[] players = Physics2D.OverlapCircleAll(transform.position, 600f, LayerMask.GetMask("Player"));
@@ -159,19 +161,21 @@ namespace Crowbar.Item
                 NetworkServer.Destroy(gameObject);
         }
 
+        [Server]
         public virtual void Fall()
         {
             if (handedCharacter == null)
             {
                 if (isFall)
                 {
-                    RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, 2f, LayerMask.GetMask("GroundCollision"));
+                    RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, distanceToGrounded, LayerMask.GetMask("GroundCollision"));
 
                     if (hit.collider != null)
                     {                       
                         transform.position = hit.point + Vector2.up * offsetLanded;
 
                         isFall = false;
+                        rigidbodyItem.simulated = false;
                     }
                     else
                     {
@@ -180,14 +184,15 @@ namespace Crowbar.Item
                 }
                 else
                 {
-                    RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, 1f, LayerMask.GetMask("GroundCollision"));
+                    //RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, distanceToGrounded, LayerMask.GetMask("GroundCollision"));
 
-                    if (hit.collider == null)
-                        isFall = true;
+                    //if (hit.collider == null)
+                    //    isFall = true;
                 }
             }
         }
 
+        [Server]
         public virtual void CheckToSleep()
         {
             if (rigidbodyItem.velocity.y < 1f && !rigidbodyItem.isKinematic)
